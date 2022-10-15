@@ -2,12 +2,14 @@
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Resolvers;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.GeneratedSheets;
 
 namespace PartyIcons.Api;
 
@@ -182,7 +184,7 @@ public class XivApi : IDisposable
 
         public SafeNamePlateObject(IntPtr pointer, int index = -1)
         {
-            Pointer = pointer - 16;
+            Pointer = pointer;
             Data = Marshal.PtrToStructure<AddonNamePlate.NamePlateObject>(pointer);
             _Index = index;
         }
@@ -346,6 +348,47 @@ public class XivApi : IDisposable
         public bool IsAllianceMember() => XivApi.IsAllianceMember(Data.ObjectID.ObjectID);
 
         public uint GetJobID() => GetJobId(Data.ObjectID.ObjectID);
+        public string getJobName() => GetJobName(Data.ObjectID.ObjectID);
+
+        
+        public ExcelResolver<ClassJob>? getJob() => GetJob(Data.ObjectID.ObjectID);
+
+        private ExcelResolver<ClassJob> GetJob(uint actorID)
+        {
+            foreach (var obj in _plugin.ObjectTable)
+            {
+                if (obj == null)
+                {
+                    continue;
+                }
+
+                if (obj.ObjectId == actorID && obj is PlayerCharacter character)
+                {
+                    return character.ClassJob;
+                }
+            }
+
+            return null;
+        }
+
+        private string GetJobName(uint objectIdObjectId)
+        {
+            
+            foreach (var obj in _plugin.ObjectTable)
+            {
+                if (obj == null)
+                {
+                    continue;
+                }
+
+                if (obj.ObjectId == objectIdObjectId && obj is PlayerCharacter character)
+                {
+                    return character.ClassJob.GameData.Name;
+                }
+            }
+
+            return "未知职业";
+        }
 
         private unsafe IntPtr GetStringPtr(string name)
         {

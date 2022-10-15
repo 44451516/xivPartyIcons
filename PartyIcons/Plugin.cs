@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿using System;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Party;
@@ -6,6 +7,7 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Dalamud.Plugin;
 using PartyIcons.Api;
 using PartyIcons.Runtime;
@@ -154,7 +156,7 @@ public sealed class Plugin : IDalamudPlugin
     {
     }
 
-    private void OnCommand(string command, string arguments)
+    private unsafe  void OnCommand(string command, string arguments)
     {
         arguments = arguments.Trim().ToLower();
 
@@ -177,6 +179,17 @@ public sealed class Plugin : IDalamudPlugin
         else if (arguments == "dbg party")
         {
             ChatGui.Print(_partyHUDView.GetDebugInfo());
+        }
+        
+        else if (arguments == "dbg test1")
+        {
+            var localPlayer = ClientState.LocalPlayer;
+            if (localPlayer != null)
+            {
+                FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text("我是新的名字"));
+            }
+            
         }
     }
 }

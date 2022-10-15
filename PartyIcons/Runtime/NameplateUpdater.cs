@@ -1,8 +1,10 @@
 ﻿using System;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Resolvers;
 using Dalamud.Hooking;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Lumina.Excel.GeneratedSheets;
 using PartyIcons.Api;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
@@ -104,17 +106,28 @@ public sealed class NameplateUpdater : IDisposable
             return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
         }
 
-        var jobID = npInfo.GetJobID();
 
-        if (jobID < 1 || jobID >= Enum.GetValues(typeof(Job)).Length)
+        ExcelResolver<ClassJob>? job = npInfo.getJob();
+
+        if (job != null)
         {
-            _view.SetupDefault(npObject);
+            var jobId =      job.Id;
 
-            return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            if (jobId < 1 || jobId >= Enum.GetValues(typeof(Job)).Length)
+            {
+                _view.SetupDefault(npObject);
+
+                return _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
+            }
+            
+            if (job.GameData != null)
+            {
+                _view.NameplateDataForPC(npObject, ref isPrefixTitle, ref displayTitle, ref title, ref name, ref fcName, ref iconID, job.GameData.Name);
+            }
         }
 
-        _view.NameplateDataForPC(npObject, ref isPrefixTitle, ref displayTitle, ref title, ref name, ref fcName,
-            ref iconID);
+
+     
 
         var result = _hook.Original(namePlateObjectPtr, isPrefixTitle, displayTitle, title, name, fcName, iconID);
         _view.SetupForPC(npObject);

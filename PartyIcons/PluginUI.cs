@@ -365,7 +365,7 @@ internal class PluginUI : IDisposable
 
             NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
                 (mode) => _configuration.NameplateAllianceRaid = mode,
-                "Alliance:");
+                "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -450,7 +450,7 @@ internal class PluginUI : IDisposable
 
             ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
                 (mode) => _configuration.ChatAllianceRaid = mode,
-                "Alliance:");
+                "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -723,10 +723,11 @@ internal class PluginUI : IDisposable
         {
             NameplateMode.Default => "游戏设置",
             NameplateMode.Hide => "隐藏",
+            NameplateMode.SmallJobIcon => "[小的职业图标]、[名字]",
+            NameplateMode.SmallJobName => "[小的职业图标]、[职业名称]",
+            NameplateMode.SmallJobIconAndRole => "[小的职业图标]、[规则]、[名字]",
             NameplateMode.BigJobIcon => "[大的职业图标]",
-            NameplateMode.SmallJobIcon => "[小的职业图标]和[名字]",
-            NameplateMode.SmallJobIconAndRole => "[小的职业图标],[规则]和[名字]",
-            NameplateMode.BigJobIconAndPartySlot => "[大的职业图标]和[小队顺序]",
+            NameplateMode.BigJobIconAndPartySlot => "[大的职业图标]、[小队顺序]",
             NameplateMode.RoleLetters => "Role letters",
             _ => throw new ArgumentException()
         };

@@ -6,6 +6,7 @@ public enum NameplateMode
     Hide,
     SmallJobIcon,
     SmallJobIconAndRole,
+    SmallJobName,
     BigJobIcon,
     BigJobIconAndPartySlot,
     RoleLetters
