@@ -182,7 +182,7 @@ public class XivApi : IDisposable
 
         public SafeNamePlateObject(IntPtr pointer, int index = -1)
         {
-            Pointer = pointer;
+            Pointer = pointer - 16;
             Data = Marshal.PtrToStructure<AddonNamePlate.NamePlateObject>(pointer);
             _Index = index;
         }
