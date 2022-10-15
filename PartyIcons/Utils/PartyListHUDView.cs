@@ -99,9 +99,12 @@ public unsafe class PartyListHUDView : IDisposable
             if (memberStruct.HasValue)
             {
                 var nameString = memberStruct.Value.Name->NodeText.ToString();
+
+                名字伪装((int)i,memberStruct);
+                
                 var strippedName = StripSpecialCharactersFromName(nameString);
 
-                if (name.Contains(strippedName))
+                // if (name.Contains(strippedName))
                 {
                     if (!index.HasValue || index.Value != i)
                     {
@@ -110,7 +113,7 @@ public unsafe class PartyListHUDView : IDisposable
                     }
 
                     SetPartyMemberRole(i, roleId);
-
+                    // SetPartyName(i, );
                     return;
                 }
             }
@@ -119,16 +122,41 @@ public unsafe class PartyListHUDView : IDisposable
         PluginLog.Verbose($"Member struct by the name {name} not found.");
     }
 
+    private void 名字伪装(int index, AddonPartyList.PartyListMemberStruct? memberStruct)
+    {
+        PartyMember? partyMember = PartyList[index];
+        if (partyMember != null)
+        {
+            if (memberStruct != null)
+            {
+                if (partyMember.ClassJob.GameData != null)
+                {
+                memberStruct.Value.Name->SetText(partyMember.ClassJob.GameData.Name);
+                }
+            }
+       
+        }
+        
+    }
+
+
+
     public void SetPartyMemberRole(uint index, RoleId roleId)
     {
         var memberStructOptional = GetPartyMemberStruct(index);
 
+        
+        
+        
         if (!memberStructOptional.HasValue)
         {
             PluginLog.Warning($"Failed to set party member HUD role to {roleId} - struct null!");
 
             return;
         }
+        
+        
+        
 
         var memberStruct = memberStructOptional.Value;
 
@@ -225,6 +253,9 @@ public unsafe class PartyListHUDView : IDisposable
 
             return null;
         }
+        
+        // partyListAddon->PartyMember.
+        
 
         return idx switch
         {
@@ -247,11 +278,15 @@ public unsafe class PartyListHUDView : IDisposable
         for (var i = 0; i < name.Length; i++)
         {
             var ch = name[i];
-
-            if (ch >= 65 && ch <= 90 || ch >= 97 && ch <= 122 || ch == 45 || ch == 32 || ch == 39)
-            {
-                result.Append(name[i]);
-            }
+            
+            result.Append($"{i} -> {ch}");
+            
+            
+            
+            // if (ch >= 65 && ch <= 90 || ch >= 97 && ch <= 122 || ch == 45 || ch == 32 || ch == 39)
+            // {
+            // result.Append(name[i]);
+            // }
         }
 
         return result.ToString().Trim();

@@ -48,12 +48,12 @@ public sealed class PlayerStylesheet
             case RoleId.OT:
                 return GetGenericRoleColor(GenericRole.Tank);
 
-            case RoleId.M1:
-            case RoleId.M2:
+            case RoleId.D1:
+            case RoleId.D2:
                 return GetGenericRoleColor(GenericRole.Melee);
 
-            case RoleId.R1:
-            case RoleId.R2:
+            case RoleId.D3:
+            case RoleId.D4:
                 return GetGenericRoleColor(GenericRole.Ranged);
 
             case RoleId.H1:
@@ -80,10 +80,10 @@ public sealed class PlayerStylesheet
                 {
                     RoleId.MT => "Blue",
                     RoleId.OT => "Blue",
-                    RoleId.M1 => "Red",
-                    RoleId.M2 => "Red",
-                    RoleId.R1 => "Orange",
-                    RoleId.R2 => "Orange",
+                    RoleId.D1 => "Red",
+                    RoleId.D2 => "Red",
+                    RoleId.D3 => "Orange",
+                    RoleId.D4 => "Orange",
                     RoleId.H1 => "Green",
                     RoleId.H2 => "Green",
                     _ => "Grey"
@@ -125,10 +125,10 @@ public sealed class PlayerStylesheet
         {
             RoleId.MT => "MT",
             RoleId.OT => _configuration.EasternNamingConvention ? "ST" : "OT",
-            RoleId.M1 => _configuration.EasternNamingConvention ? "D1" : "M1",
-            RoleId.M2 => _configuration.EasternNamingConvention ? "D2" : "M2",
-            RoleId.R1 => _configuration.EasternNamingConvention ? "D3" : "R1",
-            RoleId.R2 => _configuration.EasternNamingConvention ? "D4" : "R2",
+            RoleId.D1 => _configuration.EasternNamingConvention ? "D1" : "M1",
+            RoleId.D2 => _configuration.EasternNamingConvention ? "D2" : "M2",
+            RoleId.D3 => _configuration.EasternNamingConvention ? "D3" : "R1",
+            RoleId.D4 => _configuration.EasternNamingConvention ? "D4" : "R2",
             _ => roleId.ToString()
         };
     }
@@ -168,14 +168,14 @@ public sealed class PlayerStylesheet
                     BoxedCharacterString(_configuration.EasternNamingConvention ? "ST" : "OT"),
                     GetRoleColor(roleId));
 
-            case RoleId.M1:
-            case RoleId.M2:
+            case RoleId.D1:
+            case RoleId.D2:
                 return SeStringUtils.Text(
                     BoxedCharacterString(_configuration.EasternNamingConvention ? "D" : "M") +
                     GetRolePlateNumber(roleId), GetRoleColor(roleId));
 
-            case RoleId.R1:
-            case RoleId.R2:
+            case RoleId.D3:
+            case RoleId.D4:
                 return SeStringUtils.Text(
                     BoxedCharacterString(_configuration.EasternNamingConvention ? "D" : "R") +
                     GetRolePlateNumber(roleId), GetRoleColor(roleId));
@@ -200,10 +200,10 @@ public sealed class PlayerStylesheet
                 RoleId.OT => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
                 RoleId.H1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
                 RoleId.H2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
-                RoleId.M1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
-                RoleId.M2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
-                RoleId.R1 => SeStringUtils.Text(BoxedCharacterString("3"), GetRoleColor(roleId)),
-                RoleId.R2 => SeStringUtils.Text(BoxedCharacterString("4"), GetRoleColor(roleId))
+                RoleId.D1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
+                RoleId.D2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
+                RoleId.D3 => SeStringUtils.Text(BoxedCharacterString("3"), GetRoleColor(roleId)),
+                RoleId.D4 => SeStringUtils.Text(BoxedCharacterString("4"), GetRoleColor(roleId))
             };
         }
         else
@@ -214,10 +214,10 @@ public sealed class PlayerStylesheet
                 RoleId.OT => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
                 RoleId.H1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
                 RoleId.H2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
-                RoleId.M1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
-                RoleId.M2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
-                RoleId.R1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
-                RoleId.R2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId))
+                RoleId.D1 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
+                RoleId.D2 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId)),
+                RoleId.D3 => SeStringUtils.Text(BoxedCharacterString("1"), GetRoleColor(roleId)),
+                RoleId.D4 => SeStringUtils.Text(BoxedCharacterString("2"), GetRoleColor(roleId))
             };
         }
     }

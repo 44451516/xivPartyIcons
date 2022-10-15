@@ -68,7 +68,7 @@ public sealed class RoleTracker : IDisposable
 
         for (var i = 1; i < 5; i++)
         {
-            var roleId = RoleId.M1 + i - 1;
+            var roleId = RoleId.D1 + i - 1;
             _occupationMessages.Add((roleId, $" d{i} "));
             _suggestionRegexes.Add((roleId, new Regex($"\\Wd{i}\\W")));
         }
@@ -292,10 +292,10 @@ public sealed class RoleTracker : IDisposable
                 return new[] { RoleId.MT, RoleId.OT };
 
             case GenericRole.Melee:
-                return new[] { RoleId.M1, RoleId.M2, RoleId.R1, RoleId.R2 };
+                return new[] { RoleId.D1, RoleId.D2, RoleId.D3, RoleId.D4 };
 
             case GenericRole.Ranged:
-                return new[] { RoleId.R1, RoleId.R2, RoleId.M1, RoleId.M2 };
+                return new[] { RoleId.D3, RoleId.D4, RoleId.D1, RoleId.D2 };
 
             case GenericRole.Healer:
                 return new[] { RoleId.H1, RoleId.H2 };

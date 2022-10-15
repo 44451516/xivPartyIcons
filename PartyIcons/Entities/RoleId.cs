@@ -5,10 +5,10 @@ public enum RoleId
     Undefined,
     MT = 1,
     OT,
-    M1,
-    M2,
-    R1,
-    R2,
+    D1,
+    D2,
+    D3,
+    D4,
     H1,
     H2
 }
@@ -23,10 +23,10 @@ public static class RoleIdUtils
             RoleId.OT => RoleId.MT,
             RoleId.H1 => RoleId.H2,
             RoleId.H2 => RoleId.H1,
-            RoleId.M1 => RoleId.M2,
-            RoleId.M2 => RoleId.M1,
-            RoleId.R1 => RoleId.R2,
-            RoleId.R2 => RoleId.R1,
+            RoleId.D1 => RoleId.D2,
+            RoleId.D2 => RoleId.D1,
+            RoleId.D3 => RoleId.D4,
+            RoleId.D4 => RoleId.D3,
             _ => RoleId.Undefined
         };
     }

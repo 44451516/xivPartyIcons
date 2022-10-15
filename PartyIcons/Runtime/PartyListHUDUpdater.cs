@@ -7,8 +7,10 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Network;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Newtonsoft.Json;
 using PartyIcons.Entities;
 using PartyIcons.Utils;
@@ -19,7 +21,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 {
     public bool UpdateHUD = false;
 
-    [PluginService] public PartyList PartyList { get; set; }
+    [PluginService] public static PartyList PartyList { get; set; }
     [PluginService] public Framework Framework { get; set; }
     [PluginService] public GameNetwork GameNetwork { get; set; }
     [PluginService] public ClientState ClientState { get; set; }
@@ -160,8 +162,21 @@ public sealed class PartyListHUDUpdater : IDisposable
 
         if (_configuration.TestingMode)
         {
-            var localPlayer = ClientState.LocalPlayer;
-            _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.M1);
+            unsafe
+            {
+                var localPlayer = ClientState.LocalPlayer;
+                // localPlayer.Name=""
+            
+                // FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                //
+                // var timeSeString = new SeString(new List<Payload>());
+                // timeSeString.Append("我是傻宝");
+                
+            
+                // MemoryHelper.WriteSeString((IntPtr)Struct->Name, timeSeString);
+   
+                _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.D1);
+            }
         }
 
         if (!UpdateHUD)

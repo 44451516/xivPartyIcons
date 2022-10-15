@@ -29,6 +29,7 @@ namespace PartyIcons.View
 
         public void Enable()
         {
+            ContextMenu.OnOpenGameObjectContextMenu -= OnOpenContextMenu;
             ContextMenu.OnOpenGameObjectContextMenu += OnOpenContextMenu;
         }
 

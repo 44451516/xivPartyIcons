@@ -242,7 +242,6 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, 2f));
 
         var testingMode = _configuration.TestingMode;
-        
         if (ImGui.Checkbox("##testingMode", ref testingMode))
         {
             _configuration.TestingMode = testingMode;
@@ -250,7 +249,7 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.Text("Enable testing mode");
+        ImGui.Text("启用测试模式");
         ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 
         var chatContentMessage = _configuration.ChatContentMessage;
@@ -332,7 +331,7 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0f, 10f));
         
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Overworld");
+        ImGui.Text("在外面");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
@@ -350,7 +349,7 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, 2f));
         
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Instances");
+        ImGui.Text("副本里面");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
@@ -470,8 +469,8 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.Text("Eastern role naming convention");
-        ImGuiComponents.HelpMarker("Use Japanese data center role naming convention (MT ST D1-D4 H1-2).");
+        ImGui.Text("日式方式规则ST D1 D2 D3 D4");
+        ImGuiComponents.HelpMarker("日式方式规则 (MT ST D1-D4 H1-2).");
 
         var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
 
@@ -722,12 +721,12 @@ internal class PluginUI : IDisposable
     {
         return mode switch
         {
-            NameplateMode.Default => "Game default",
-            NameplateMode.Hide => "Hide",
-            NameplateMode.BigJobIcon => "Big job icon",
-            NameplateMode.SmallJobIcon => "Small job icon and name",
-            NameplateMode.SmallJobIconAndRole => "Small job icon, role and name",
-            NameplateMode.BigJobIconAndPartySlot => "Big job icon and party number",
+            NameplateMode.Default => "游戏设置",
+            NameplateMode.Hide => "隐藏",
+            NameplateMode.BigJobIcon => "[大的职业图标]",
+            NameplateMode.SmallJobIcon => "[小的职业图标]和[名字]",
+            NameplateMode.SmallJobIconAndRole => "[小的职业图标],[规则]和[名字]",
+            NameplateMode.BigJobIconAndPartySlot => "[大的职业图标]和[小队顺序]",
             NameplateMode.RoleLetters => "Role letters",
             _ => throw new ArgumentException()
         };
