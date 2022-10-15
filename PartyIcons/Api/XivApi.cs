@@ -311,7 +311,7 @@ public class XivApi : IDisposable
 
         public SafeNamePlateInfo(IntPtr pointer)
         {
-            Pointer = pointer; //-0x10;
+            Pointer = pointer - 16; //-0x10;
             Data = Marshal.PtrToStructure<RaptureAtkModule.NamePlateInfo>(Pointer);
         }
 
