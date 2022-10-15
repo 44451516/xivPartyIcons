@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net5.0-windows</TargetFramework>
         <Platforms>x64</Platforms>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
@@ -38,14 +38,14 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudLibPath>E:\Games\FFVIX\Dalamud6.0\addon\Hooks\6.4.0.48\</DalamudLibPath>
     </PropertyGroup>
 
 
     <ItemGroup>
-        <PackageReference Include="Dalamud.ContextMenu" Version="1.2.1" />
-        <PackageReference Include="DalamudPackager" Version="2.1.8" />
-        <PackageReference Include="XivCommon" Version="6.0.2" />
+        <PackageReference Include="Dalamud.ContextMenu" Version="1.1.1" />
+        <PackageReference Include="DalamudPackager" Version="2.1.7" />
+        <PackageReference Include="XivCommon" Version="5.0.0" />
         <Reference Include="FFXIVClientStructs">
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
