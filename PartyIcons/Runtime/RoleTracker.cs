@@ -351,12 +351,12 @@ public sealed class RoleTracker : IDisposable
                     if (roleToOccupy == RoleId.Undefined)
                     {
                         roleToOccupy = tuple.Item1;
+                        break;
                     }
                     else
                     {
                         PluginLog.Debug($"Multiple role occupation matches, aborting");
                         occupationTainted = true;
-
                         break;
                     }
                 }

@@ -1,11 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
+using PartyIcons.Utils;
 using PartyIcons.View;
 
 namespace PartyIcons.Runtime;
@@ -63,8 +66,10 @@ public sealed class ViewModeSetter
         Disable();
     }
 
-    private void OnTerritoryChanged(object? sender, ushort e)
+    private unsafe  void OnTerritoryChanged(object? sender, ushort e)
     {
+
+
         var content =
             _contentFinderConditionsSheet.FirstOrDefault(t => t.TerritoryType.Row == ClientState.TerritoryType);
 
@@ -78,7 +83,7 @@ public sealed class ViewModeSetter
         {
             if (_configuration.ChatContentMessage)
             {
-                ChatGui.Print($"Entering {content.Name}.");
+                ChatGui.Print($"进入 {content.Name}.");
             }
 
             var memberType = content.ContentMemberType.Row;
@@ -138,6 +143,8 @@ public sealed class ViewModeSetter
         }
 
         _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
+                                         _nameplateView.PartyMode == NameplateMode.SmallJobName ||
+                                         _nameplateView.PartyMode == NameplateMode.SmallJobIcon ||
                                          _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
         PluginLog.Debug(

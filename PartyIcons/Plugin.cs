@@ -25,7 +25,7 @@ public sealed class Plugin : IDalamudPlugin
 
     [PluginService] public DalamudPluginInterface Interface { get; set; }
 
-    [PluginService] public ClientState ClientState { get; set; }
+    [PluginService] public static ClientState ClientState { get; set; }
 
     [PluginService] public Framework Framework { get; set; }
 
@@ -37,7 +37,7 @@ public sealed class Plugin : IDalamudPlugin
 
     [PluginService] public ChatGui ChatGui { get; set; }
 
-    [PluginService] public PartyList PartyList { get; set; }
+    [PluginService] public static PartyList PartyList { get; set; }
 
     [PluginService] public SigScanner SigScanner { get; set; }
 

@@ -110,14 +110,14 @@ public sealed class PartyListHUDUpdater : IDisposable
 
         PluginLog.Debug("PartyListHUDUpdater forcing update due to changes in the config");
         PluginLog.Verbose(_view.GetDebugInfo());
-        UpdatePartyListHUD();
+        UpdatePartyListHud();
     }
 
     private void OnAssignedRolesUpdated()
     {
         PluginLog.Debug("PartyListHUDUpdater forcing update due to assignments update");
         PluginLog.Verbose(_view.GetDebugInfo());
-        UpdatePartyListHUD();
+        UpdatePartyListHud();
     }
 
     private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid,
@@ -128,7 +128,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         {
             PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
             PluginLog.Verbose(_view.GetDebugInfo());
-            UpdatePartyListHUD();
+            UpdatePartyListHud();
         }
     }
 
@@ -148,56 +148,60 @@ public sealed class PartyListHUDUpdater : IDisposable
 
         if (DateTime.Now - _lastUpdate > TimeSpan.FromSeconds(15))
         {
-            UpdatePartyListHUD();
+            UpdatePartyListHud();
             _lastUpdate = DateTime.Now;
         }
     }
 
-    private void UpdatePartyListHUD()
+    private unsafe void UpdatePartyListHud()
     {
-        if (!_configuration.DisplayRoleInPartyList)
+        
+        if (!ClientState.IsLoggedIn)
         {
             return;
         }
 
-        if (_configuration.TestingMode)
-        {
-            unsafe
-            {
-                var localPlayer = ClientState.LocalPlayer;
-                // localPlayer.Name=""
-            
-                // FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
-                //
-                // var timeSeString = new SeString(new List<Payload>());
-                // timeSeString.Append("我是傻宝");
-                
-            
-                // MemoryHelper.WriteSeString((IntPtr)Struct->Name, timeSeString);
-   
-                _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.D1);
-            }
-        }
-
-        if (!UpdateHUD)
-        {
-            return;
-        }
+        
+        // if (!_configuration.DisplayJobNameInPartyList)
+        // {
+        //     return;
+        // }
 
         if (ClientState.IsPvP)
         {
             return;
         }
-
-        PluginLog.Verbose("Updating party list HUD");
-        _displayingRoles = true;
-
-        foreach (var member in PartyList)
+        
+        if (_configuration.名字伪装开关)
         {
-            if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
+            var localPlayer = ClientState.LocalPlayer;
+            if (localPlayer != null)
             {
-                PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
-                _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
+                FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* localPlayerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                MemoryHelper.WriteSeString((IntPtr)localPlayerAddress->Name, SeStringUtils.Text(_configuration.名字伪装me));
+            }
+        }
+        
+        
+        if (_configuration.TestingMode)
+        {
+            var localPlayer = ClientState.LocalPlayer;
+            if (localPlayer != null)
+            {
+                _view.SetPartyMemberJobName(localPlayer.Name.ToString(), localPlayer.ObjectId,true);
+            }
+        }
+
+        
+
+        if (_configuration.小队队伍开关)
+        {
+            foreach (var member in PartyList)
+            {
+                if (member.ObjectId > 0)
+                {
+                    _view.SetPartyMemberJobName(member.Name.ToString(), member.ObjectId,_configuration.DisplayJobNameInPartyList);
+                }
             }
         }
     }

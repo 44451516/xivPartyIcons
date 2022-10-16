@@ -20,6 +20,16 @@ public class Configuration : IPluginConfiguration
     public bool DisplayRoleInPartyList = false;
     public bool UseContextMenu = false;
     public bool AssignFromChat = true;
+    public bool 名字伪装开关 = false;
+    
+    public bool 小队队伍开关 = false;
+    public bool DisplayJobNameInPartyList = false;
+    
+    public string 名字伪装me = "龙傲天";
+    
+    public List<伪装Entity> List伪装 = new List<伪装Entity>();
+
+
 
     public IconSetId IconSetId { get; set; } = IconSetId.GlowingColored;
     public NameplateSizeMode SizeMode { get; set; } = NameplateSizeMode.Medium;

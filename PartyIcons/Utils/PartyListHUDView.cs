@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Text;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.System.String;
@@ -9,13 +12,14 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using PartyIcons.Entities;
 using PartyIcons.Stylesheet;
+using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace PartyIcons.Utils;
 
 public unsafe class PartyListHUDView : IDisposable
 {
-    [PluginService]
-    public PartyList PartyList { get; set; }
+    [PluginService] public PartyList PartyList { get; set; }
 
     private readonly PlayerStylesheet _stylesheet;
     private readonly GameGui _gameGui;
@@ -56,9 +60,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     public uint? GetPartySlotIndex(uint objectId)
     {
-        var hud =
-            FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->
-                GetAgentHUD();
+        var hud = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHUD();
 
         if (hud == null)
         {
@@ -75,13 +77,46 @@ public unsafe class PartyListHUDView : IDisposable
             return null;
         }
 
-        var list = (HudPartyMember*) hud->PartyMemberList;
+        var list = (HudPartyMember*)hud->PartyMemberList;
 
         for (var i = 0; i < hud->PartyMemberCount; i++)
         {
             if (list[i].ObjectId == objectId)
             {
-                return (uint) i;
+                return (uint)i;
+            }
+        }
+
+        return null;
+    }
+
+
+    public Character? GetParty(uint objectId)
+    {
+        var hud = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHUD();
+
+        if (hud == null)
+        {
+            PluginLog.Warning("AgentHUD null!");
+
+            return null;
+        }
+
+        if (hud->PartyMemberCount > 8)
+        {
+            // hud->PartyMemberCount gives out special (?) value when in trust
+            PluginLog.Debug("GetPartySlotIndex - trust detected, returning null");
+
+            return null;
+        }
+
+        var list = (HudPartyMember*)hud->PartyMemberList;
+
+        for (var i = 0; i < hud->PartyMemberCount; i++)
+        {
+            if (list[i].ObjectId == objectId)
+            {
+                return list[i].Object->Character;
             }
         }
 
@@ -100,11 +135,9 @@ public unsafe class PartyListHUDView : IDisposable
             {
                 var nameString = memberStruct.Value.Name->NodeText.ToString();
 
-                名字伪装((int)i,memberStruct);
-                
                 var strippedName = StripSpecialCharactersFromName(nameString);
 
-                // if (name.Contains(strippedName))
+                if (name.Contains(strippedName))
                 {
                     if (!index.HasValue || index.Value != i)
                     {
@@ -113,7 +146,6 @@ public unsafe class PartyListHUDView : IDisposable
                     }
 
                     SetPartyMemberRole(i, roleId);
-                    // SetPartyName(i, );
                     return;
                 }
             }
@@ -122,41 +154,96 @@ public unsafe class PartyListHUDView : IDisposable
         PluginLog.Verbose($"Member struct by the name {name} not found.");
     }
 
-    private void 名字伪装(int index, AddonPartyList.PartyListMemberStruct? memberStruct)
+
+    public string? jobNameByObjectID(uint ObjectID)
     {
-        PartyMember? partyMember = PartyList[index];
-        if (partyMember != null)
+        foreach (PartyMember partyMember in PartyList)
         {
-            if (memberStruct != null)
+            if (partyMember.ObjectId == ObjectID)
             {
-                if (partyMember.ClassJob.GameData != null)
-                {
-                memberStruct.Value.Name->SetText(partyMember.ClassJob.GameData.Name);
-                }
+                return partyMember.ClassJob.GameData.Name;
             }
-       
         }
-        
+
+        return null;
     }
 
+    public void SetPartyMemberJobName(string name, uint objectId, bool isEnable)
+    {
+        var index = GetPartySlotIndex(objectId);
+        Character? character = GetParty(objectId);
+
+        if (character != null)
+        {
+            GameObject gameObject = character.Value.GameObject;
+            string? jobName = jobNameByObjectID(gameObject.ObjectID);
+
+
+            for (uint i = 0; i < 8; i++)
+            {
+                var memberStruct = GetPartyMemberStruct(i);
+
+                if (memberStruct.HasValue)
+                {
+                    var nameString = memberStruct.Value.Name->NodeText.ToString();
+                    var strippedName = StripSpecialCharactersFromName(nameString);
+                    if (isEnable)
+                    {
+                        if (name.Contains(strippedName))
+                        {
+                            if (!index.HasValue || index.Value != i)
+                            {
+                                PluginLog.Warning("PartyHUD and HUDAgent id's mismatch!");
+                                PluginLog.Warning(GetDebugInfo());
+                            }
+
+
+                            if (jobName != null)
+                            {
+                                string replaceName = nameString.Replace(name, jobName);
+
+                                var buf = SeStringUtils.Text(replaceName).Encode();
+
+                                fixed (byte* ptr = buf)
+                                {
+                                    memberStruct.Value.Name->SetText(ptr);
+                                }
+                            }
+                        }
+                        
+                        return;
+                    }
+                    else
+                    {
+                        string replaceName = nameString.Replace(jobName, name);
+                        var buf = SeStringUtils.Text(replaceName).Encode();
+                        fixed (byte* ptr = buf)
+                        {
+                            memberStruct.Value.Name->SetText(ptr);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        PluginLog.Verbose($"Member struct by the name {name} not found.");
+    }
 
 
     public void SetPartyMemberRole(uint index, RoleId roleId)
     {
         var memberStructOptional = GetPartyMemberStruct(index);
 
-        
-        
-        
+
         if (!memberStructOptional.HasValue)
         {
             PluginLog.Warning($"Failed to set party member HUD role to {roleId} - struct null!");
 
             return;
         }
-        
-        
-        
+
 
         var memberStruct = memberStructOptional.Value;
 
@@ -175,11 +262,54 @@ public unsafe class PartyListHUDView : IDisposable
         }
     }
 
+    public void SetPartyMemberJobNameReal(uint index, SeString jobName)
+    {
+        var memberStructOptional = GetPartyMemberStruct(index);
+
+
+        if (!memberStructOptional.HasValue)
+        {
+            return;
+        }
+
+
+        var memberStruct = memberStructOptional.Value;
+
+        var nameNode = memberStruct.Name;
+        // nameNode->AtkResNode.SetPositionShort(29, 0);
+        //
+        //
+        // var buf = jobName.Encode();
+        // fixed (byte* ptr = buf)
+        // {
+        //     nameNode->SetText(ptr);
+        // }
+
+        nameNode->SetText(jobName.TextValue);
+
+
+        // var numberNode = nameNode->AtkResNode.PrevSiblingNode->GetAsAtkTextNode();
+        // numberNode->AtkResNode.SetPositionShort(6, 0);
+        //
+        // var buf = jobName.Encode();
+        //
+        // fixed (byte* ptr = buf)
+        // {
+        //     nameNode->SetText(ptr);
+        // }
+        //
+        // var seString = SeStringUtils.Text("8888");
+        //
+        // var buf1 = seString.Encode();
+        // fixed (byte* ptr = buf1)
+        // {
+        //     numberNode->SetText(ptr);
+        // }
+    }
+
     public string GetDebugInfo()
     {
-        var hud =
-            FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->
-                GetAgentHUD();
+        var hud = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHUD();
 
         if (hud == null)
         {
@@ -202,16 +332,15 @@ public unsafe class PartyListHUDView : IDisposable
         foreach (var member in PartyList)
         {
             var index = GetPartySlotIndex(member.ObjectId);
-            result.AppendLine(
-                $"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");
+            result.AppendLine($"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");
         }
 
         result.AppendLine("STRUCTS:");
-        var memberList = (HudPartyMember*) hud->PartyMemberList;
+        var memberList = (HudPartyMember*)hud->PartyMemberList;
 
         for (var i = 0; i < hud->PartyMemberCount; i++)
         {
-            var memberStruct = GetPartyMemberStruct((uint) i);
+            var memberStruct = GetPartyMemberStruct((uint)i);
 
             if (memberStruct.HasValue)
             {
@@ -224,12 +353,13 @@ public unsafe class PartyListHUDView : IDisposable
                 */
 
                 var strippedName = StripSpecialCharactersFromName(memberStruct.Value.Name->NodeText.ToString());
-                result.AppendLine(
-                    $"PartyMemberStruct index {i} name '{strippedName}', id matched {memberList[i].ObjectId}");
+                result.AppendLine($"PartyMemberStruct index {i} name '{strippedName}', id matched {memberList[i].ObjectId}");
 
                 var byteCount = 0;
 
-                while (byteCount < 16 && memberList[i].Name[byteCount++] != 0) { }
+                while (byteCount < 16 && memberList[i].Name[byteCount++] != 0)
+                {
+                }
 
                 var memberListName = Encoding.UTF8.GetString(memberList[i].Name, byteCount - 1);
                 result.AppendLine($"HudPartyMember index {i} name {memberListName} {memberList[i].ObjectId}");
@@ -245,7 +375,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     private AddonPartyList.PartyListMemberStruct? GetPartyMemberStruct(uint idx)
     {
-        var partyListAddon = (AddonPartyList*) _gameGui.GetAddonByName("_PartyList", 1);
+        var partyListAddon = (AddonPartyList*)_gameGui.GetAddonByName("_PartyList", 1);
 
         if (partyListAddon == null)
         {
@@ -253,9 +383,9 @@ public unsafe class PartyListHUDView : IDisposable
 
             return null;
         }
-        
+
         // partyListAddon->PartyMember.
-        
+
 
         return idx switch
         {
@@ -275,18 +405,21 @@ public unsafe class PartyListHUDView : IDisposable
     {
         var result = new StringBuilder();
 
+        var isAppend = false;
+
         for (var i = 0; i < name.Length; i++)
         {
             var ch = name[i];
-            
-            result.Append($"{i} -> {ch}");
-            
-            
-            
-            // if (ch >= 65 && ch <= 90 || ch >= 97 && ch <= 122 || ch == 45 || ch == 32 || ch == 39)
-            // {
-            // result.Append(name[i]);
-            // }
+            if (ch == 32)
+            {
+                isAppend = true;
+            }
+
+            // result.Append($"{i} -> {ch}");
+            if (isAppend)
+            {
+                result.Append(name[i]);
+            }
         }
 
         return result.ToString().Trim();

@@ -24,8 +24,7 @@ namespace PartyIcons;
 
 internal class PluginUI : IDisposable
 {
-    [PluginService]
-    private DalamudPluginInterface Interface { get; set; }
+    [PluginService] private DalamudPluginInterface Interface { get; set; }
 
     private readonly Configuration _configuration;
     private readonly PlayerStylesheet _stylesheet;
@@ -66,13 +65,7 @@ internal class PluginUI : IDisposable
     public void Initialize()
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var examplesImageNames = new Dictionary<NameplateMode, string>
-        {
-            {NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png"},
-            {NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png"},
-            {NameplateMode.BigJobIconAndPartySlot, "PartyIcons.Resources.3.png"},
-            {NameplateMode.RoleLetters, "PartyIcons.Resources.4.png"}
-        };
+        var examplesImageNames = new Dictionary<NameplateMode, string> { { NameplateMode.SmallJobIcon, "PartyIcons.Resources.1.png" }, { NameplateMode.BigJobIcon, "PartyIcons.Resources.2.png" }, { NameplateMode.BigJobIconAndPartySlot, "PartyIcons.Resources.3.png" }, { NameplateMode.RoleLetters, "PartyIcons.Resources.4.png" } };
 
         _nameplateExamples = new Dictionary<NameplateMode, TextureWrap>();
 
@@ -104,7 +97,7 @@ internal class PluginUI : IDisposable
             stringAsync.Wait();
             var strArray = stringAsync.Result.Split('|');
 
-            if ((uint) strArray.Length > 0U)
+            if ((uint)strArray.Length > 0U)
             {
                 _noticeString = Regex.Replace(strArray[0], "\n", "\n\n");
             }
@@ -122,7 +115,9 @@ internal class PluginUI : IDisposable
                 _noticeUrl = null;
             }
         }
-        catch (Exception ex) { }
+        catch (Exception ex)
+        {
+        }
     }
 
     private void DisplayNotice()
@@ -133,7 +128,7 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.Dummy(new Vector2(0.0f, 15f));
-        ImGui.PushStyleColor((ImGuiCol) 0, ImGuiColors.DPSRed);
+        ImGui.PushStyleColor((ImGuiCol)0, ImGuiColors.DPSRed);
         ImGuiHelpers.SafeTextWrapped(_noticeString);
 
         if (_noticeUrl != null)
@@ -142,31 +137,32 @@ internal class PluginUI : IDisposable
             {
                 try
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = _noticeUrl,
-                        UseShellExecute = true
-                    });
+                    Process.Start(new ProcessStartInfo { FileName = _noticeUrl, UseShellExecute = true });
                 }
-                catch (Exception ex) { }
+                catch (Exception ex)
+                {
+                }
             }
         }
 
         ImGui.PopStyleColor();
     }
-    
-    public void Dispose() { }
+
+    public void Dispose()
+    {
+        _configuration.Save();
+    }
 
     public void OpenSettingsWindow()
     {
         SettingsVisible = true;
     }
-    
+
     public void ToggleSettingsWindow()
     {
         SettingsVisible = !SettingsVisible;
     }
-    
+
     public void DrawSettingsWindow()
     {
         if (!SettingsVisible)
@@ -187,54 +183,149 @@ internal class PluginUI : IDisposable
                     if (ImGui.BeginChild("##general_content"))
                     {
                         DrawGeneralSettings();
-                        
+
                         ImGui.EndChild();
                     }
-                    
+
                     ImGui.EndTabItem();
                 }
-                
-                if (ImGui.BeginTabItem("Nameplates"))
+
+                if (ImGui.BeginTabItem("铭牌"))
                 {
                     if (ImGui.BeginChild("##nameplates_content"))
                     {
                         DrawNameplateSettings();
-                        
+
                         ImGui.EndChild();
                     }
-                    
+
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Chat Names"))
+                if (ImGui.BeginTabItem("聊天窗口"))
                 {
                     if (ImGui.BeginChild("##chat_names_content"))
                     {
                         DrawChatNameSettings();
-                        
+
                         ImGui.EndChild();
                     }
-                    
+
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Roles##static_assignments"))
+                if (ImGui.BeginTabItem("Roles"))
                 {
                     if (ImGui.BeginChild("##static_assignments_content"))
                     {
                         DrawStaticAssignmentsSettings();
-                        
+
                         ImGui.EndChild();
                     }
-                    
+
                     ImGui.EndTabItem();
                 }
-                
+
+
+                if (ImGui.BeginTabItem("小队队伍"))
+                {
+                    if (ImGui.BeginChild("##小队队伍_content"))
+                    {
+                        Draw小队队伍Settings();
+
+                        ImGui.EndChild();
+                    }
+
+                    ImGui.EndTabItem();
+                }
+
+
+                if (ImGui.BeginTabItem("名字伪装"))
+                {
+                    if (ImGui.BeginChild("##名字伪装_content"))
+                    {
+                        Draw名字伪装Settings();
+
+                        ImGui.EndChild();
+                    }
+
+                    ImGui.EndTabItem();
+                }
+
+
                 ImGui.EndTabBar();
             }
         }
 
         ImGui.End();
+    }
+
+    private void Draw名字伪装Settings()
+    {
+        var 名字伪装开关 = _configuration.名字伪装开关;
+        if (ImGui.Checkbox("##名字伪装", ref 名字伪装开关))
+        {
+            _configuration.名字伪装开关 = 名字伪装开关;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("启用");
+        
+        // ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
+        // ImGui.Dummy(new Vector2(0, 2f));
+        
+        
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("自己");
+        ImGui.PopStyleColor();
+        
+        ImGui.Separator();
+        if (Plugin.ClientState.LocalPlayer != null)
+        {
+            ImGui.SetNextItemWidth(200);
+            ImGui.InputText($"##{Plugin.ClientState.LocalPlayer.ObjectId}", ref _configuration.名字伪装me, 20);
+        }
+
+
+        /*
+        int index = 0;
+        
+        foreach (var gameObject in Plugin.PartyList)
+        {
+            
+            
+            
+            index++;
+            ImGui.Text(gameObject.Name.ToString());
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(200f);
+            ImGui.InputText($"#{gameObject.ObjectId}", ref _configuration.List伪装[index].新的名字, 9);
+            ImGui.SameLine();
+            // ImGui.SetCursorPosX(300f);
+            // ImGui.Text($"{gameObject.DataId:X8}");
+            // ImGui.SameLine();
+            // ImGui.SetCursorPosX(400f);
+            // ImGui.Text($"{PvPSelectorAPI4.MemoryManager.GetIsTargetable((gameObject is Character ch) ? ch : gameObject)}");
+            // ImGui.SameLine();
+            // ImGui.SetCursorPosX(500f);
+            // ImGui.Text($"{((gameObject is Character chr) ? PvPSelectorAPI4.MemoryManager.GetIsVisible(chr) : "Not a char")}");
+            // ImGui.SameLine();
+            // ImGui.SetCursorPosX(600f);
+            //
+            // if (DrawDeleteButton($"##GameObject{gameObject.ObjectId}"))
+            // {
+            //     // Peon.Config.BothersTalk.RemoveAt(idx);
+            //     // --idx;
+            //     // Save();
+            // }
+            //
+            // ImGui.SameLine();
+            // ImGui.SetCursorPosX(650f);
+            // ImGui.Text($"{gameObject.ObjectKind}");
+            // // ImGui.CheckboxFlags(a.Name.ToString(), ref aaa,0);
+        }
+        */
     }
 
     private void DrawGeneralSettings()
@@ -261,20 +352,21 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.Text("Display chat message when entering duty");
-        ImGuiComponents.HelpMarker("Can be used to determine the duty type before fully loading in.");
+        // ImGui.Text("Display chat message when entering duty");
+        ImGui.Text("在聊天窗口显示副本名称");
+        ImGuiComponents.HelpMarker("可以进入副本之前知道副本内容");
 
-        DisplayNotice();
+        // DisplayNotice();
     }
-    
+
     private void DrawNameplateSettings()
     {
         const float separatorPadding = 2f;
-        
+
         ImGui.Dummy(new Vector2(0, 1f));
         ImGui.TextDisabled("Please note, it usually takes time for nameplates to reload.");
         ImGui.Dummy(new Vector2(0, 10f));
-        
+
         var iconSetId = _configuration.IconSetId;
         ImGui.Text("Icon set:");
         ImGui.SameLine();
@@ -314,7 +406,7 @@ internal class PluginUI : IDisposable
         }
 
         ImGuiHelpTooltip("Affects all presets, except Game Default and Small Job Icon.");
-        
+
         var hideLocalNameplate = _configuration.HideLocalPlayerNameplate;
 
         if (ImGui.Checkbox("##hidelocal", ref hideLocalNameplate))
@@ -325,11 +417,10 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Hide own nameplate");
-        ImGuiHelpTooltip(
-            "You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
+        ImGuiHelpTooltip("You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
         ImGui.Dummy(new Vector2(0f, 10f));
-        
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
         ImGui.Text("在外面");
         ImGui.PopStyleColor();
@@ -337,17 +428,13 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld,
-                (mode) => _configuration.NameplateOverworld = mode,
-                "Party:");
-    
-            NameplateModeSection("##np_others", () => _configuration.NameplateOthers,
-                (mode) => _configuration.NameplateOthers = mode,
-                "Others:");
+            NameplateModeSection("##np_overworld", () => _configuration.NameplateOverworld, (mode) => _configuration.NameplateOverworld = mode, "Party:");
+
+            NameplateModeSection("##np_others", () => _configuration.NameplateOthers, (mode) => _configuration.NameplateOthers = mode, "Others:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
-        
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
         ImGui.Text("副本里面");
         ImGui.PopStyleColor();
@@ -355,21 +442,15 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon,
-                (mode) => _configuration.NameplateDungeon = mode,
-                "Dungeon:");
+            NameplateModeSection("##np_dungeon", () => _configuration.NameplateDungeon, (mode) => _configuration.NameplateDungeon = mode, "Dungeon:");
 
-            NameplateModeSection("##np_raid", () => _configuration.NameplateRaid,
-                (mode) => _configuration.NameplateRaid = mode,
-                "Raid:");
+            NameplateModeSection("##np_raid", () => _configuration.NameplateRaid, (mode) => _configuration.NameplateRaid = mode, "高难:");
 
-            NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid,
-                (mode) => _configuration.NameplateAllianceRaid = mode,
-                "团队:");
+            NameplateModeSection("##np_alliance", () => _configuration.NameplateAllianceRaid, (mode) => _configuration.NameplateAllianceRaid = mode, "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
-        
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
         ImGui.Text("Forays");
         ImGui.PopStyleColor();
@@ -377,13 +458,11 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ImGui.TextDisabled("e.g. Eureka, Bozja");
-            
-            NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty,
-                mode => _configuration.NameplateBozjaParty = mode, "Party:");
-            
-            NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers,
-                mode => _configuration.NameplateBozjaOthers = mode, "Others:");
+            ImGui.TextDisabled("优雷卡、博兹雅");
+
+            NameplateModeSection("##np_bozja_party", () => _configuration.NameplateBozjaParty, mode => _configuration.NameplateBozjaParty = mode, "小队:");
+
+            NameplateModeSection("##np_bozja_others", () => _configuration.NameplateBozjaOthers, mode => _configuration.NameplateBozjaOthers = mode, "其他:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -395,7 +474,7 @@ internal class PluginUI : IDisposable
         ImGui.Dummy(new Vector2(0, 2f));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ImGui.TextDisabled("This plugin is intentionally disabled during PvP matches.");
+            ImGui.TextDisabled("PVP别想了，不能用");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 10f));
@@ -410,47 +489,38 @@ internal class PluginUI : IDisposable
             }
         }
     }
-    
+
     private void DrawChatNameSettings()
     {
         const float separatorPadding = 2f;
         ImGui.Dummy(new Vector2(0, separatorPadding));
-        
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Overworld");
+        ImGui.Text("外面");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld,
-                (mode) => _configuration.ChatOverworld = mode,
-                "Party:");
-            
-            ChatModeSection("##chat_others", () => _configuration.ChatOthers,
-                (mode) => _configuration.ChatOthers = mode,
-                "Others:");
+            ChatModeSection("##chat_overworld", () => _configuration.ChatOverworld, (mode) => _configuration.ChatOverworld = mode, "小队:");
+
+            ChatModeSection("##chat_others", () => _configuration.ChatOthers, (mode) => _configuration.ChatOthers = mode, "其他:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
-        
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Instances");
+        ImGui.Text("副本");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon,
-                (mode) => _configuration.ChatDungeon = mode,
-                "Dungeon:");
+            ChatModeSection("##chat_dungeon", () => _configuration.ChatDungeon, (mode) => _configuration.ChatDungeon = mode, "Dungeon:");
 
-            ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode,
-                "Raid:");
+            ChatModeSection("##chat_raid", () => _configuration.ChatRaid, (mode) => _configuration.ChatRaid = mode, "高难:");
 
-            ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid,
-                (mode) => _configuration.ChatAllianceRaid = mode,
-                "团队:");
+            ChatModeSection("##chat_alliance", () => _configuration.ChatAllianceRaid, (mode) => _configuration.ChatAllianceRaid = mode, "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -459,7 +529,7 @@ internal class PluginUI : IDisposable
     private void DrawStaticAssignmentsSettings()
     {
         ImGui.Dummy(new Vector2(0, 2f));
-        
+
         var easternNamingConvention = _configuration.EasternNamingConvention;
 
         if (ImGui.Checkbox("##easteannaming", ref easternNamingConvention))
@@ -472,6 +542,8 @@ internal class PluginUI : IDisposable
         ImGui.Text("日式方式规则ST D1 D2 D3 D4");
         ImGuiComponents.HelpMarker("日式方式规则 (MT ST D1-D4 H1-2).");
 
+        
+        /*
         var displayRoleInPartyList = _configuration.DisplayRoleInPartyList;
 
         if (ImGui.Checkbox("##displayrolesinpartylist", ref displayRoleInPartyList))
@@ -482,12 +554,25 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("Replace party numbers with role in Party List");
-        ImGuiHelpTooltip(
-            "EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).",
-            true);
-        
+        ImGuiHelpTooltip("EXPERIMENTAL. Only works when nameplates set to 'Role letters' and Party List player character names are shown in full (not abbreviated).", true);
+
+        */
+
+        // var displayJobNameInPartyList = _configuration.DisplayJobNameInPartyList;
+        //
+        // if (ImGui.Checkbox("##DisplayJobNameInPartyList", ref displayJobNameInPartyList))
+        // {
+        //     _configuration.DisplayJobNameInPartyList = displayJobNameInPartyList;
+        //     _configuration.Save();
+        // }
+        //
+        // ImGui.SameLine();
+        // ImGui.Text("用职业名称填充小队队伍");
+        // ImGuiHelpTooltip("用职业名称填充小队队伍", true);
+
+
         var useContextMenu = _configuration.UseContextMenu;
-        
+
         if (ImGui.Checkbox("##useContextMenu", ref useContextMenu))
         {
             _configuration.UseContextMenu = useContextMenu;
@@ -495,8 +580,8 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.Text("Add context menu commands to assign roles");
-        ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
+        ImGui.Text("添加菜单");
+        ImGuiComponents.HelpMarker("右键设置规则");
 
         var assignFromChat = _configuration.AssignFromChat;
 
@@ -507,16 +592,14 @@ internal class PluginUI : IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.Text("Allow party members to self-assign roles via party chat");
+        ImGui.Text("监听聊天");
         ImGuiComponents.HelpMarker("Allows party members to assign themselves a role, e.g. saying 'h1' in party chat will give that player the healer 1 role.");
-        
+
         ImGui.Dummy(new Vector2(0, 2f));
-        
-        
-        
-        
+
+
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Static Roles");
+        ImGui.Text("静态规则");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, 2f));
@@ -524,20 +607,15 @@ internal class PluginUI : IDisposable
         {
             ImGui.PushStyleColor(0, ImGuiColors.ParsedGrey);
             {
-                ImGui.TextWrapped(
-                    "Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
+                ImGui.TextWrapped("Name should include world name, separated by @. Keep in mind that if players job is not appropriate for the assigned role, the assignment will be ignored!");
                 ImGui.Dummy(new Vector2(0f, 25f));
             }
             ImGui.PopStyleColor();
         }
         // ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         // ImGui.Dummy(new Vector2(0, 2f));
-        
-        
-        
-        
-        
-        
+
+
         ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 22f);
         foreach (var kv in new Dictionary<string, RoleId>(_configuration.StaticAssignments))
         {
@@ -552,13 +630,11 @@ internal class PluginUI : IDisposable
             ImGui.SameLine();
             SetComboWidth(Enum.GetValues<RoleId>().Select(x => _stylesheet.GetRoleName(x)));
 
-            if (ImGui.BeginCombo("##role_combo_" + kv.Key,
-                    _stylesheet.GetRoleName(_configuration.StaticAssignments[kv.Key])))
+            if (ImGui.BeginCombo("##role_combo_" + kv.Key, _stylesheet.GetRoleName(_configuration.StaticAssignments[kv.Key])))
             {
                 foreach (var roleId in Enum.GetValues<RoleId>())
                 {
-                    if (ImGui.Selectable(_stylesheet.GetRoleName(roleId) + "##role_combo_option_" + kv.Key + "_" +
-                                         roleId))
+                    if (ImGui.Selectable(_stylesheet.GetRoleName(roleId) + "##role_combo_option_" + kv.Key + "_" + roleId))
                     {
                         _configuration.StaticAssignments[kv.Key] = roleId;
                         _configuration.Save();
@@ -596,10 +672,37 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.InputText("##new_role_name", ref _occupationNewName, 64);
-        
-        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + 22f);
 
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + 22f);
     }
+
+
+    private void Draw小队队伍Settings()
+    {
+        
+        var 小队队伍开关 = _configuration.小队队伍开关;
+        if (ImGui.Checkbox("##小队队伍开关", ref 小队队伍开关))
+        {
+            _configuration.小队队伍开关 = 小队队伍开关;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("启用");
+        
+        var displayJobNameInPartyList = _configuration.DisplayJobNameInPartyList;
+
+        if (ImGui.Checkbox("##DisplayJobNameInPartyList", ref displayJobNameInPartyList))
+        {
+            _configuration.DisplayJobNameInPartyList = displayJobNameInPartyList;
+            _configuration.Save();
+        }
+
+        ImGui.SameLine();
+        ImGui.Text("用职业名称替换小队队伍");
+        ImGuiHelpTooltip("用职业名称填充小队队伍", true);
+    }
+
 
     private void CollapsibleExampleImage(NameplateMode mode, TextureWrap tex)
     {
@@ -672,13 +775,12 @@ internal class PluginUI : IDisposable
         };
     }
 
-    private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter,
-        string title = "Nameplate: ")
+    private void NameplateModeSection(string label, Func<NameplateMode> getter, Action<NameplateMode> setter, string title = "Nameplate: ")
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + 3f);
         ImGui.Text(title);
         ImGui.SameLine(100f);
-            ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 3f);
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y - 3f);
         SetComboWidth(Enum.GetValues<NameplateMode>().Select(x => x.ToString()));
 
         // hack to fix incorrect configurations
@@ -732,10 +834,10 @@ internal class PluginUI : IDisposable
             _ => throw new ArgumentException()
         };
     }
-    
+
     private void SetComboWidth(IEnumerable<string> values)
     {
-        const float paddingMultiplier = 1.05f; 
+        const float paddingMultiplier = 1.05f;
         float maxItemWidth = float.MinValue;
 
         foreach (var text in values)

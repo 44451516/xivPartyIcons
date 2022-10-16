@@ -56,14 +56,14 @@ public class XivApi : IDisposable
             Marshal.GetDelegateForFunctionPointer<BattleCharaStore_LookupBattleCharaByObjectIDDelegate>(
                 address.BattleCharaStore_LookupBattleCharaByObjectIDPtr);
 
-        _plugin.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
+        Plugin.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
     }
 
     public static void DisposeInstance() => Instance.Dispose();
 
     public void Dispose()
     {
-        _plugin.ClientState.Logout -= OnLogout_ResetRaptureAtkModule;
+        Plugin.ClientState.Logout -= OnLogout_ResetRaptureAtkModule;
     }
 
     #region RaptureAtkModule
@@ -95,7 +95,7 @@ public class XivApi : IDisposable
 
     public static SafeAddonNamePlate GetSafeAddonNamePlate() => new(_plugin.Interface);
 
-    public static bool IsLocalPlayer(uint actorID) => _plugin.ClientState.LocalPlayer?.ObjectId == actorID;
+    public static bool IsLocalPlayer(uint actorID) => Plugin.ClientState.LocalPlayer?.ObjectId == actorID;
 
     public static bool IsPartyMember(uint actorID) =>
         Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
