@@ -36,7 +36,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     private bool _previousTesting = false;
     private DateTime _lastUpdate = DateTime.Today;
 
-    private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
+    private const string OpcodesUrl = "https://opcodes.xivcdn.com/opcodes.min.json";
     private List<int> _prepareZoningOpcodes = new();
 
     public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Configuration configuration)
@@ -74,7 +74,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
         foreach (var clientType in json)
         {
-            if (clientType.region == "Global")
+            if (clientType.region == "CN")
             {
                 foreach (var record in clientType["lists"]["ServerZoneIpcType"])
                 {
@@ -177,8 +177,14 @@ public sealed class PartyListHUDUpdater : IDisposable
             var localPlayer = ClientState.LocalPlayer;
             if (localPlayer != null)
             {
-                FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* localPlayerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
-                MemoryHelper.WriteSeString((IntPtr)localPlayerAddress->Name, SeStringUtils.Text(_configuration.名字伪装me));
+                string newName = _configuration.名字伪装me.Trim();
+
+                if (localPlayer.Name.ToString() != newName)
+                {
+                    FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* localPlayerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                    MemoryHelper.WriteSeString((IntPtr)localPlayerAddress->Name, SeStringUtils.Text(newName));   
+                }
+           
             }
         }
         

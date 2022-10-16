@@ -160,6 +160,8 @@ public sealed class Plugin : IDalamudPlugin
     {
         arguments = arguments.Trim().ToLower();
 
+        string[] strings = arguments.Split(" ");
+
         if (arguments == "" || arguments == "config")
         {
             _ui.ToggleSettingsWindow();
@@ -181,15 +183,20 @@ public sealed class Plugin : IDalamudPlugin
             ChatGui.Print(_partyHUDView.GetDebugInfo());
         }
         
-        else if (arguments == "dbg test1")
+        else if (strings[0] == "name")
         {
-            var localPlayer = ClientState.LocalPlayer;
-            if (localPlayer != null)
+            if (strings.Length > 1)
             {
-                FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
-                MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text("我是新的名字"));
+                var localPlayer = ClientState.LocalPlayer;
+                if (localPlayer != null)
+                {
+                    Configuration.名字伪装me = strings[1].Trim();
+                    FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                    MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text(Configuration.名字伪装me));
+                }
+
             }
-            
+
         }
     }
 }

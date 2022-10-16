@@ -12,6 +12,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Dalamud.Plugin;
 using ImGuiNET;
 using ImGuiScene;
@@ -86,7 +87,7 @@ internal class PluginUI : IDisposable
             _nameplateExamples[kv.Key] = Interface.UiBuilder.LoadImage(memoryStream.ToArray());
         }
 
-        DownloadAndParseNotice();
+        // DownloadAndParseNotice();
     }
 
     private void DownloadAndParseNotice()
@@ -262,8 +263,13 @@ internal class PluginUI : IDisposable
 
     private void Draw名字伪装Settings()
     {
+        
+        ImGui.Dummy(new Vector2(0, 1f));
+        ImGui.TextDisabled("实验功能存在很多问题，会修改act名字\n指令:/ppi name [需要修改的名字] \n示例:/ppi name 木木枭");
+        ImGui.Dummy(new Vector2(0, 10f));
+        
         var 名字伪装开关 = _configuration.名字伪装开关;
-        if (ImGui.Checkbox("##名字伪装", ref 名字伪装开关))
+        if (ImGui.Checkbox("##名字伪装_Checkbox", ref 名字伪装开关))
         {
             _configuration.名字伪装开关 = 名字伪装开关;
             _configuration.Save();
@@ -271,6 +277,10 @@ internal class PluginUI : IDisposable
 
         ImGui.SameLine();
         ImGui.Text("启用");
+        
+        
+        
+        
         
         // ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         // ImGui.Dummy(new Vector2(0, 2f));
@@ -284,8 +294,26 @@ internal class PluginUI : IDisposable
         if (Plugin.ClientState.LocalPlayer != null)
         {
             ImGui.SetNextItemWidth(200);
-            ImGui.InputText($"##{Plugin.ClientState.LocalPlayer.ObjectId}", ref _configuration.名字伪装me, 20);
+            ImGui.InputText($"##名字伪装_InputText", ref _configuration.名字伪装me, 20);
         }
+        
+        ImGui.SameLine();
+        
+        if (ImGui.Button("确定"))
+        {
+            var localPlayer = Plugin.ClientState.LocalPlayer;
+            if (localPlayer != null)
+            {
+                unsafe
+                {
+                    FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                    MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text( _configuration.名字伪装me.Trim()));
+                }
+            }
+            
+           
+        }
+        
 
 
         /*
