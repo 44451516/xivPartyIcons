@@ -165,19 +165,33 @@ public unsafe class PartyListHUDView : IDisposable
             }
         }
 
+        return "冒险者";
+    }
+    
+    public PartyMember? getPartyMemberByObjectID(uint ObjectID)
+    {
+        foreach (PartyMember partyMember in PartyList)
+        {
+            if (partyMember.ObjectId == ObjectID)
+            {
+                return partyMember;
+            }
+        }
+
         return null;
     }
 
-    public void SetPartyMemberJobName(string name, uint objectId, bool isEnable)
+    public void SetPartyMemberJobName(Dalamud.Game.ClientState.Objects.Types.GameObject? gameObject, bool isEnable)
     {
-        var index = GetPartySlotIndex(objectId);
-        Character? character = GetParty(objectId);
-
-        if (character != null)
+   
+        
+        
+        if (gameObject != null)
         {
-            GameObject gameObject = character.Value.GameObject;
-            string? jobName = jobNameByObjectID(gameObject.ObjectID);
-
+            
+            var index = GetPartySlotIndex(gameObject.ObjectId);
+            string name = gameObject.Name.ToString();
+            string? jobName = jobNameByObjectID(gameObject.ObjectId);
 
             for (uint i = 0; i < 8; i++)
             {
@@ -209,10 +223,12 @@ public unsafe class PartyListHUDView : IDisposable
                                     memberStruct.Value.Name->SetText(ptr);
                                 }
                             }
+                            // return;
                         }
+
                         
-                        return;
                     }
+                    /*
                     else
                     {
                         string replaceName = nameString.Replace(jobName, name);
@@ -221,16 +237,49 @@ public unsafe class PartyListHUDView : IDisposable
                         {
                             memberStruct.Value.Name->SetText(ptr);
                         }
-                        return;
+
+                        // return;
                     }
+                    */
                 }
             }
         }
 
 
-        PluginLog.Verbose($"Member struct by the name {name} not found.");
     }
+    public void SetPartyMemberName冒险者()
+    {
+        for (uint i = 0; i < 8; i++)
+        {
+            var memberStruct = GetPartyMemberStruct(i);
 
+            if (memberStruct.HasValue)
+            {
+                
+                var nameString = memberStruct.Value.Name->NodeText.ToString();
+                var strippedName = StripSpecialCharactersFromName(nameString);
+                var jobName = "机智的冒险者";
+                {
+                    // if (nameString.Contains(strippedName))
+                    {
+                        {
+                            // string replaceName = nameString.Replace(strippedName, jobName);
+                            // string replaceName = nameString.Replace(strippedName, jobName);
+
+                            var buf = SeStringUtils.Text(jobName).Encode();
+
+                            fixed (byte* ptr = buf)
+                            {
+                                memberStruct.Value.Name->SetText(ptr);
+                            }
+                        }
+                    }
+
+                }
+    
+            }
+        }
+    }
 
     public void SetPartyMemberRole(uint index, RoleId roleId)
     {
@@ -287,6 +336,8 @@ public unsafe class PartyListHUDView : IDisposable
 
         nameNode->SetText(jobName.TextValue);
 
+        
+        
 
         // var numberNode = nameNode->AtkResNode.PrevSiblingNode->GetAsAtkTextNode();
         // numberNode->AtkResNode.SetPositionShort(6, 0);
@@ -418,10 +469,16 @@ public unsafe class PartyListHUDView : IDisposable
             // result.Append($"{i} -> {ch}");
             if (isAppend)
             {
-                result.Append(name[i]);
+                if (ch != 2 && ch != 3 && ch != 18)
+                {
+                    result.Append(name[i]);
+                }
             }
         }
 
         return result.ToString().Trim();
     }
+
+
+    
 }

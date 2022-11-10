@@ -316,6 +316,19 @@ internal class PluginUI : IDisposable
         
 
 
+        ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
+        ImGui.Text("队友");
+        ImGui.PopStyleColor();
+        
+        ImGui.Separator();
+        
+        var 队友名字伪装开关_职业名称 = _configuration.队友名字伪装开关_职业名称;
+        if (ImGui.Checkbox("职业名称", ref 队友名字伪装开关_职业名称))
+        {
+            _configuration.队友名字伪装开关_职业名称 = 队友名字伪装开关_职业名称;
+            _configuration.Save();
+        }
+        
         /*
         int index = 0;
         

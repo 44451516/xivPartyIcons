@@ -191,12 +191,39 @@ public sealed class Plugin : IDalamudPlugin
                 if (localPlayer != null)
                 {
                     Configuration.名字伪装me = strings[1].Trim();
+                    Configuration.Save();
                     FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
                     MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text(Configuration.名字伪装me));
                 }
 
             }
 
+        }else if (arguments == "xiaoduiname")
+        {
+            
+            var localPlayer = ClientState.LocalPlayer;
+            if (localPlayer == null)
+            {
+                return;
+            }
+            
+            foreach (var member in PartyList)
+            {
+                if (member.ObjectId == localPlayer.ObjectId)
+                {
+                    continue;
+                }
+
+                if (member.ObjectId > 0)
+                {
+                    var jobName = member.ClassJob.GameData.Name;
+                    if (jobName.ToString() != member.Name.ToString())
+                    {
+                        FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* playerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)member.GameObject.Address;
+                        MemoryHelper.WriteString((IntPtr)playerAddress->Name, jobName);
+                    }
+                }
+            }
         }
     }
 }

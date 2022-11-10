@@ -21,6 +21,7 @@ public class Configuration : IPluginConfiguration
     public bool UseContextMenu = false;
     public bool AssignFromChat = true;
     public bool 名字伪装开关 = false;
+    public bool 队友名字伪装开关_职业名称 = false;
     
     public bool 小队队伍开关 = false;
     public bool DisplayJobNameInPartyList = false;
