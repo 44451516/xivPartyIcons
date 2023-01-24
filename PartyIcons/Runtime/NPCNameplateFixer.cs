@@ -31,6 +31,15 @@ public sealed class NPCNameplateFixer : IDisposable
 
     private void TaskMain(CancellationToken token)
     {
+        var clientState = Service.ClientState;
+        
+        if(clientState.IsLoggedIn==false)
+            return;
+        
+        if(clientState.LocalPlayer==null)
+            return;
+
+        
         try
         {
             PluginLog.Debug("NPCNameplateFixer thread started");
@@ -55,6 +64,16 @@ public sealed class NPCNameplateFixer : IDisposable
 
     private void RevertNPC()
     {
+        var clientState = Service.ClientState;
+        
+        if(clientState.IsLoggedIn==false)
+            return;
+        
+        if(clientState.LocalPlayer==null)
+            return;
+        
+        
+
         var addon = XivApi.GetSafeAddonNamePlate();
 
         for (var i = 0; i < 50; i++)
@@ -91,6 +110,15 @@ public sealed class NPCNameplateFixer : IDisposable
 
     private void RevertAll()
     {
+        var clientState = Service.ClientState;
+        
+        if(clientState.IsLoggedIn==false)
+            return;
+        
+        if(clientState.LocalPlayer==null)
+            return;
+
+        
         var addon = XivApi.GetSafeAddonNamePlate();
 
         for (var i = 0; i < 50; i++)

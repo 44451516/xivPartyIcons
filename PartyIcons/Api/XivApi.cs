@@ -30,7 +30,7 @@ public class XivApi : IDisposable
     public static void Initialize(Plugin plugin, PluginAddressResolver address)
     {
         _plugin ??= plugin;
-        Instance ??= new XivApi(plugin.Interface, address);
+        Instance ??= new XivApi(Service.PluginInterface, address);
     }
 
     private static XivApi Instance;
@@ -56,14 +56,14 @@ public class XivApi : IDisposable
             Marshal.GetDelegateForFunctionPointer<BattleCharaStore_LookupBattleCharaByObjectIDDelegate>(
                 address.BattleCharaStore_LookupBattleCharaByObjectIDPtr);
 
-        Plugin.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
+        Service.ClientState.Logout += OnLogout_ResetRaptureAtkModule;
     }
 
     public static void DisposeInstance() => Instance.Dispose();
 
     public void Dispose()
     {
-        Plugin.ClientState.Logout -= OnLogout_ResetRaptureAtkModule;
+        Service.ClientState.Logout -= OnLogout_ResetRaptureAtkModule;
     }
 
     #region RaptureAtkModule
@@ -93,9 +93,9 @@ public class XivApi : IDisposable
 
     #endregion
 
-    public static SafeAddonNamePlate GetSafeAddonNamePlate() => new(_plugin.Interface);
+    public static SafeAddonNamePlate GetSafeAddonNamePlate() => new(Service.PluginInterface);
 
-    public static bool IsLocalPlayer(uint actorID) => Plugin.ClientState.LocalPlayer?.ObjectId == actorID;
+    public static bool IsLocalPlayer(uint actorID) => Service.ClientState.LocalPlayer?.ObjectId == actorID;
 
     public static bool IsPartyMember(uint actorID) =>
         Instance.IsObjectIDInParty(_plugin.Address.GroupManagerPtr, actorID) == 1;
@@ -105,7 +105,7 @@ public class XivApi : IDisposable
 
     public static bool IsPlayerCharacter(uint actorID)
     {
-        foreach (var obj in _plugin.ObjectTable)
+        foreach (var obj in Service.ObjectTable)
         {
             if (obj == null)
             {
@@ -123,7 +123,7 @@ public class XivApi : IDisposable
 
     public static uint GetJobId(uint actorID)
     {
-        foreach (var obj in _plugin.ObjectTable)
+        foreach (var obj in Service.ObjectTable)
         {
             if (obj == null)
             {
@@ -143,7 +143,7 @@ public class XivApi : IDisposable
     {
         private readonly DalamudPluginInterface Interface;
 
-        public IntPtr Pointer => _plugin.GameGui.GetAddonByName("NamePlate", 1);
+        public IntPtr Pointer => Service.GameGui.GetAddonByName("NamePlate", 1);
 
         public SafeAddonNamePlate(DalamudPluginInterface pluginInterface)
         {
@@ -163,7 +163,7 @@ public class XivApi : IDisposable
 
             if (npObjectArrayPtr == IntPtr.Zero)
             {
-                PluginLog.Debug($"[{GetType().Name}] NamePlateObjectArray was null");
+                PluginLog.Verbose($"[{GetType().Name}] NamePlateObjectArray was null");
 
                 return null;
             }
@@ -200,7 +200,7 @@ public class XivApi : IDisposable
 
                     if (npObject0 == null)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] NamePlateObject0 was null");
+                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject0 was null");
 
                         return -1;
                     }
@@ -211,7 +211,7 @@ public class XivApi : IDisposable
 
                     if (index < 0 || index >= 50)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] NamePlateObject index was out of bounds");
+                        PluginLog.Verbose($"[{GetType().Name}] NamePlateObject index was out of bounds");
 
                         return -1;
                     }
@@ -233,7 +233,7 @@ public class XivApi : IDisposable
 
                     if (rapturePtr == IntPtr.Zero)
                     {
-                        PluginLog.Debug($"[{GetType().Name}] RaptureAtkModule was null");
+                        PluginLog.Verbose($"[{GetType().Name}] RaptureAtkModule was null");
 
                         return null;
                     }
@@ -348,19 +348,18 @@ public class XivApi : IDisposable
         public bool IsAllianceMember() => XivApi.IsAllianceMember(Data.ObjectID.ObjectID);
 
         public uint GetJobID() => GetJobId(Data.ObjectID.ObjectID);
-        public string getJobName() => GetJobName(Data.ObjectID.ObjectID);
-
         
         public ExcelResolver<ClassJob>? getJob() => GetJob(Data.ObjectID.ObjectID);
 
         private ExcelResolver<ClassJob> GetJob(uint actorID)
         {
-            foreach (var obj in _plugin.ObjectTable)
+            foreach (var obj in Service.ObjectTable)
             {
                 if (obj == null)
                 {
                     continue;
                 }
+                
 
                 if (obj.ObjectId == actorID && obj is PlayerCharacter character)
                 {
@@ -369,25 +368,6 @@ public class XivApi : IDisposable
             }
 
             return null;
-        }
-
-        private string GetJobName(uint objectIdObjectId)
-        {
-            
-            foreach (var obj in _plugin.ObjectTable)
-            {
-                if (obj == null)
-                {
-                    continue;
-                }
-
-                if (obj.ObjectId == objectIdObjectId && obj is PlayerCharacter character)
-                {
-                    return character.ClassJob.GameData.Name;
-                }
-            }
-
-            return "未知职业";
         }
 
         private unsafe IntPtr GetStringPtr(string name)

@@ -19,7 +19,7 @@ namespace PartyIcons.Utils;
 
 public unsafe class PartyListHUDView : IDisposable
 {
-    [PluginService] public PartyList PartyList { get; set; }
+
 
     private readonly PlayerStylesheet _stylesheet;
     private readonly GameGui _gameGui;
@@ -157,7 +157,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     public string? jobNameByObjectID(uint ObjectID)
     {
-        foreach (PartyMember partyMember in PartyList)
+        foreach (PartyMember partyMember in Service.PartyList)
         {
             if (partyMember.ObjectId == ObjectID)
             {
@@ -170,7 +170,7 @@ public unsafe class PartyListHUDView : IDisposable
     
     public PartyMember? getPartyMemberByObjectID(uint ObjectID)
     {
-        foreach (PartyMember partyMember in PartyList)
+        foreach (PartyMember partyMember in Service.PartyList)
         {
             if (partyMember.ObjectId == ObjectID)
             {
@@ -378,9 +378,9 @@ public unsafe class PartyListHUDView : IDisposable
         }
 
         var result = new StringBuilder();
-        result.AppendLine($"PARTY ({PartyList.Length}):");
+        result.AppendLine($"PARTY ({Service.PartyList.Length}):");
 
-        foreach (var member in PartyList)
+        foreach (var member in Service.PartyList)
         {
             var index = GetPartySlotIndex(member.ObjectId);
             result.AppendLine($"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");

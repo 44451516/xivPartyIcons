@@ -25,7 +25,6 @@ namespace PartyIcons;
 
 internal class PluginUI : IDisposable
 {
-    [PluginService] private DalamudPluginInterface Interface { get; set; }
 
     private readonly Configuration _configuration;
     private readonly PlayerStylesheet _stylesheet;
@@ -84,7 +83,7 @@ internal class PluginUI : IDisposable
             using var memoryStream = new MemoryStream();
             fileStream.CopyTo(memoryStream);
 
-            _nameplateExamples[kv.Key] = Interface.UiBuilder.LoadImage(memoryStream.ToArray());
+            _nameplateExamples[kv.Key] = Service.PluginInterface.UiBuilder.LoadImage(memoryStream.ToArray());
         }
 
         // DownloadAndParseNotice();
@@ -291,7 +290,7 @@ internal class PluginUI : IDisposable
         ImGui.PopStyleColor();
         
         ImGui.Separator();
-        if (Plugin.ClientState.LocalPlayer != null)
+        if (Service.ClientState.LocalPlayer != null)
         {
             ImGui.SetNextItemWidth(200);
             ImGui.InputText($"##名字伪装_InputText", ref _configuration.名字伪装me, 20);
@@ -301,7 +300,7 @@ internal class PluginUI : IDisposable
         
         if (ImGui.Button("确定"))
         {
-            var localPlayer = Plugin.ClientState.LocalPlayer;
+            var localPlayer = Service.ClientState.LocalPlayer;
             if (localPlayer != null)
             {
                 unsafe

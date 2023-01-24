@@ -21,10 +21,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 {
     public bool UpdateHUD = false;
 
-    [PluginService] public static PartyList PartyList { get; set; }
-    [PluginService] public Framework Framework { get; set; }
-    [PluginService] public GameNetwork GameNetwork { get; set; }
-    [PluginService] public ClientState ClientState { get; set; }
+
 
     private readonly Configuration _configuration;
     private readonly PartyListHUDView _view;
@@ -51,18 +48,18 @@ public sealed class PartyListHUDUpdater : IDisposable
     public void Enable()
     {
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
-        Framework.Update += OnUpdate;
-        GameNetwork.NetworkMessage += OnNetworkMessage;
+        Service.Framework.Update += OnUpdate;
+        Service.GameNetwork.NetworkMessage += OnNetworkMessage;
         _configuration.OnSave += OnConfigurationSave;
-        ClientState.EnterPvP += OnEnterPvP;
+        Service.ClientState.EnterPvP += OnEnterPvP;
     }
 
     public void Dispose()
     {
-        ClientState.EnterPvP -= OnEnterPvP;
+        Service.ClientState.EnterPvP -= OnEnterPvP;
         _configuration.OnSave -= OnConfigurationSave;
-        GameNetwork.NetworkMessage -= OnNetworkMessage;
-        Framework.Update -= OnUpdate;
+        Service.GameNetwork.NetworkMessage -= OnNetworkMessage;
+        Service.Framework.Update -= OnUpdate;
         _roleTracker.OnAssignedRolesUpdated -= OnAssignedRolesUpdated;
     }
 
@@ -122,7 +119,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
     private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid, NetworkMessageDirection direction)
     {
-        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) && targetactorid == ClientState.LocalPlayer?.ObjectId)
+        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) && targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             PluginLog.Debug("PartyListHUDUpdater Forcing update due to zoning");
             PluginLog.Verbose(_view.GetDebugInfo());
@@ -132,7 +129,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
     private void OnUpdate(Framework framework)
     {
-        var inParty = PartyList.Any();
+        var inParty = Service.PartyList.Any();
 
         if ((!inParty && _previousInParty) || (!_configuration.TestingMode && _previousTesting))
         {
@@ -153,7 +150,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
     private unsafe void UpdatePartyListHud()
     {
-        if (!ClientState.IsLoggedIn)
+        if (!Service.ClientState.IsLoggedIn)
         {
             return;
         }
@@ -164,12 +161,12 @@ public sealed class PartyListHUDUpdater : IDisposable
         //     return;
         // }
 
-        if (ClientState.IsPvP)
+        if (Service.ClientState.IsPvP)
         {
             return;
         }
 
-        var localPlayer = ClientState.LocalPlayer;
+        var localPlayer = Service.ClientState.LocalPlayer;
         if (localPlayer == null)
         {
             return;
@@ -201,7 +198,7 @@ public sealed class PartyListHUDUpdater : IDisposable
 
             if (_configuration.队友名字伪装开关_职业名称)
             {
-                foreach (var member in PartyList)
+                foreach (var member in Service.PartyList)
                 {
                     if (member.ObjectId == localPlayer.ObjectId)
                     {

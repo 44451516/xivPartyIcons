@@ -22,27 +22,8 @@ public sealed class Plugin : IDalamudPlugin
 {
     public string Name => "PartyIcons";
     private const string commandName = "/ppi";
-
-    [PluginService] public DalamudPluginInterface Interface { get; set; }
-
-    [PluginService] public static ClientState ClientState { get; set; }
-
-    [PluginService] public Framework Framework { get; set; }
-
-    [PluginService] public CommandManager CommandManager { get; set; }
-
-    [PluginService] public ObjectTable ObjectTable { get; set; }
-
-    [PluginService] public GameGui GameGui { get; set; }
-
-    [PluginService] public ChatGui ChatGui { get; set; }
-
-    [PluginService] public static PartyList PartyList { get; set; }
-
-    [PluginService] public SigScanner SigScanner { get; set; }
-
+    
     public PluginAddressResolver Address { get; }
-
     private Configuration Configuration { get; }
 
     private readonly PartyListHUDView _partyHUDView;
@@ -59,61 +40,65 @@ public sealed class Plugin : IDalamudPlugin
     private readonly ChatNameUpdater _chatNameUpdater;
     private readonly PlayerStylesheet _playerStylesheet;
 
-    public Plugin()
+    public Plugin(DalamudPluginInterface pluginInterface)
     {
-        Configuration = Interface.GetPluginConfig() as Configuration ?? new Configuration();
-        Configuration.Initialize(Interface);
+        pluginInterface.Create<Service>();
+        
+        Configuration = Service.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Configuration.Initialize(Service.PluginInterface);
         Configuration.OnSave += OnConfigurationSave;
 
-        CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
+        Service.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {
             HelpMessage =
                 "opens configuration window; \"reset\" or \"r\" resets all assignments; \"debug\" prints debugging info"
         });
 
         Address = new PluginAddressResolver();
-        Address.Setup(SigScanner);
+        Address.Setup(Service.SigScanner);
 
         _playerStylesheet = new PlayerStylesheet(Configuration);
 
         _ui = new PluginUI(Configuration, _playerStylesheet);
-        Interface.Inject(_ui);
+        
+        
+        Service.PluginInterface.Inject(_ui);
 
         XivApi.Initialize(this, Address);
 
         SeStringUtils.Initialize();
 
-        _partyHUDView = new PartyListHUDView(GameGui, _playerStylesheet);
-        Interface.Inject(_partyHUDView);
+        _partyHUDView = new PartyListHUDView(Service.GameGui, _playerStylesheet);
+        Service.PluginInterface.Inject(_partyHUDView);
 
         _roleTracker = new RoleTracker(Configuration);
-        Interface.Inject(_roleTracker);
+        Service.PluginInterface.Inject(_roleTracker);
 
         _nameplateView = new NameplateView(_roleTracker, Configuration, _playerStylesheet, _partyHUDView);
-        Interface.Inject(_nameplateView);
+        Service.PluginInterface.Inject(_nameplateView);
 
         _chatNameUpdater = new ChatNameUpdater(_roleTracker, _playerStylesheet);
-        Interface.Inject(_chatNameUpdater);
+        Service.PluginInterface.Inject(_chatNameUpdater);
 
         _partyListHudUpdater = new PartyListHUDUpdater(_partyHUDView, _roleTracker, Configuration);
-        Interface.Inject(_partyListHudUpdater);
+        Service.PluginInterface.Inject(_partyListHudUpdater);
 
         _nameplateUpdater = new NameplateUpdater(Address, _nameplateView);
-        Interface.Inject(_nameplateUpdater);
+        Service.PluginInterface.Inject(_nameplateUpdater);
 
         _npcNameplateFixer = new NPCNameplateFixer(_nameplateView);
 
         _contextMenu = new PlayerContextMenu(_roleTracker, Configuration, _playerStylesheet);
-        Interface.Inject(_contextMenu);
+        Service.PluginInterface.Inject(_contextMenu);
 
         _ui.Initialize();
-        Interface.UiBuilder.Draw += _ui.DrawSettingsWindow;
-        Interface.UiBuilder.OpenConfigUi += _ui.OpenSettingsWindow;
+        Service.PluginInterface.UiBuilder.Draw += _ui.DrawSettingsWindow;
+        Service.PluginInterface.UiBuilder.OpenConfigUi += _ui.OpenSettingsWindow;
 
         _roleTracker.OnAssignedRolesUpdated += OnAssignedRolesUpdated;
 
         _modeSetter = new ViewModeSetter(_nameplateView, Configuration, _chatNameUpdater, _partyListHudUpdater);
-        Interface.Inject(_modeSetter);
+        Service.PluginInterface.Inject(_modeSetter);
 
         _partyListHudUpdater.Enable();
         _modeSetter.Enable();
@@ -136,14 +121,14 @@ public sealed class Plugin : IDalamudPlugin
         _npcNameplateFixer.Dispose();
         _roleTracker.Dispose();
         _modeSetter.Dispose();
-        Interface.UiBuilder.Draw -= _ui.DrawSettingsWindow;
-        Interface.UiBuilder.OpenConfigUi -= _ui.OpenSettingsWindow;
+        Service.PluginInterface.UiBuilder.Draw -= _ui.DrawSettingsWindow;
+        Service.PluginInterface.UiBuilder.OpenConfigUi -= _ui.OpenSettingsWindow;
         _ui.Dispose();
 
         SeStringUtils.Dispose();
         XivApi.DisposeInstance();
 
-        CommandManager.RemoveHandler(commandName);
+        Service.CommandManager.RemoveHandler(commandName);
         Configuration.OnSave -= OnConfigurationSave;
     }
 
@@ -171,23 +156,23 @@ public sealed class Plugin : IDalamudPlugin
             _roleTracker.ResetOccupations();
             _roleTracker.ResetAssignments();
             _roleTracker.CalculateUnassignedPartyRoles();
-            ChatGui.Print("Occupations are reset, roles are auto assigned.");
+            Service.ChatGui.Print("Occupations are reset, roles are auto assigned.");
         }
         else if (arguments == "dbg state")
         {
-            ChatGui.Print($"Current mode is {_nameplateView.PartyMode}, party count {PartyList.Length}");
-            ChatGui.Print(_roleTracker.DebugDescription());
+            Service.ChatGui.Print($"Current mode is {_nameplateView.PartyMode}, party count {Service.PartyList.Length}");
+            Service.ChatGui.Print(_roleTracker.DebugDescription());
         }
         else if (arguments == "dbg party")
         {
-            ChatGui.Print(_partyHUDView.GetDebugInfo());
+            Service.ChatGui.Print(_partyHUDView.GetDebugInfo());
         }
         
         else if (strings[0] == "name")
         {
             if (strings.Length > 1)
             {
-                var localPlayer = ClientState.LocalPlayer;
+                var localPlayer = Service.ClientState.LocalPlayer;
                 if (localPlayer != null)
                 {
                     Configuration.名字伪装me = strings[1].Trim();
@@ -201,13 +186,13 @@ public sealed class Plugin : IDalamudPlugin
         }else if (arguments == "xiaoduiname")
         {
             
-            var localPlayer = ClientState.LocalPlayer;
+            var localPlayer = Service.ClientState.LocalPlayer;
             if (localPlayer == null)
             {
                 return;
             }
             
-            foreach (var member in PartyList)
+            foreach (var member in Service.PartyList)
             {
                 if (member.ObjectId == localPlayer.ObjectId)
                 {

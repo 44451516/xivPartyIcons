@@ -18,7 +18,7 @@ namespace PartyIcons.View;
 
 public sealed class NameplateView : IDisposable
 {
-    [PluginService] private ObjectTable ObjectTable { get; set; }
+
 
     private readonly Configuration _configuration;
     private readonly PlayerStylesheet _stylesheet;
@@ -30,7 +30,6 @@ public sealed class NameplateView : IDisposable
     public NameplateMode PartyMode { get; set; }
     public NameplateMode OthersMode { get; set; }
 
-    [PluginService] private ClientState ClientState { get; set; }
 
     public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet, PartyListHUDView partyListHudView)
     {
@@ -148,7 +147,7 @@ public sealed class NameplateView : IDisposable
         var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
         var mode = GetModeForNameplate(npObject);
 
-        if (_configuration.HideLocalPlayerNameplate && uid == ClientState.LocalPlayer?.ObjectId)
+        if (_configuration.HideLocalPlayerNameplate && uid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             switch (mode)
             {
@@ -180,7 +179,7 @@ public sealed class NameplateView : IDisposable
             }
         }
 
-        var playerCharacter = ObjectTable.SearchById(uid) as PlayerCharacter;
+        var playerCharacter = Service.ObjectTable.SearchById(uid) as PlayerCharacter;
 
         if (playerCharacter == null)
         {
@@ -313,7 +312,7 @@ public sealed class NameplateView : IDisposable
         var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
         var mode = OthersMode;
 
-        if (_configuration.TestingMode || npObject.NamePlateInfo.IsPartyMember() || uid == ClientState.LocalPlayer?.ObjectId)
+        if (_configuration.TestingMode || npObject.NamePlateInfo.IsPartyMember() || uid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             return PartyMode;
         }
