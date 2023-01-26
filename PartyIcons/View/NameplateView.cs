@@ -9,6 +9,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using PartyIcons.Api;
+using PartyIcons.Configuration;
 using PartyIcons.Entities;
 using PartyIcons.Runtime;
 using PartyIcons.Stylesheet;
@@ -18,9 +19,10 @@ namespace PartyIcons.View;
 
 public sealed class NameplateView : IDisposable
 {
+    // [PluginService]
+    // private ObjectTable ObjectTable { get; set; }
 
-
-    private readonly Configuration _configuration;
+    private readonly Settings _configuration;
     private readonly PlayerStylesheet _stylesheet;
     private readonly RoleTracker _roleTracker;
     private readonly PartyListHUDView _partyListHudView;
@@ -29,9 +31,9 @@ public sealed class NameplateView : IDisposable
 
     public NameplateMode PartyMode { get; set; }
     public NameplateMode OthersMode { get; set; }
-
-
-    public NameplateView(RoleTracker roleTracker, Configuration configuration, PlayerStylesheet stylesheet, PartyListHUDView partyListHudView)
+    
+    public NameplateView(RoleTracker roleTracker, Settings configuration, PlayerStylesheet stylesheet,
+        PartyListHUDView partyListHudView)
     {
         _roleTracker = roleTracker;
         _configuration = configuration;
@@ -40,9 +42,7 @@ public sealed class NameplateView : IDisposable
         _iconSet = new IconSet();
     }
 
-    public void Dispose()
-    {
-    }
+    public void Dispose() { }
 
     public void SetupDefault(XivApi.SafeNamePlateObject npObject)
     {
@@ -50,7 +50,12 @@ public sealed class NameplateView : IDisposable
         npObject.SetNameScale(0.5f);
     }
 
-    public void SetupForPC(XivApi.SafeNamePlateObject npObject)
+    /// <summary>
+    /// Position and scale nameplate elements based on the current mode.
+    /// </summary>
+    /// <param name="npObject">The nameplate object to modify.</param>
+    /// <param name="forceIcon">Whether modes that do not normally support icons should be adjusted to show an icon.</param>
+    public void SetupForPC(XivApi.SafeNamePlateObject npObject, bool forceIcon)
     {
         var nameScale = 0.75f;
         var iconScale = 1f;
@@ -60,7 +65,6 @@ public sealed class NameplateView : IDisposable
         {
             case NameplateMode.Default:
             case NameplateMode.SmallJobIcon:
-            case NameplateMode.SmallJobName:
             case NameplateMode.SmallJobIconAndRole:
                 SetupDefault(npObject);
 
@@ -127,6 +131,24 @@ public sealed class NameplateView : IDisposable
 
             case NameplateMode.RoleLetters:
                 iconScale = 0f;
+
+                // Allow an icon to be displayed in roles only mode
+                if (forceIcon)
+                {
+                    iconScale = _configuration.SizeMode switch
+                    {
+                        NameplateSizeMode.Smaller => 1f,
+                        NameplateSizeMode.Medium => 1.5f,
+                        NameplateSizeMode.Bigger => 2f
+                    };
+                    iconOffset = _configuration.SizeMode switch
+                    {
+                        NameplateSizeMode.Smaller => new Vector2(-6, 74),
+                        NameplateSizeMode.Medium => new Vector2(-42, 55),
+                        NameplateSizeMode.Bigger => new Vector2(-78, 35)
+                    };
+                }
+                
                 nameScale = _configuration.SizeMode switch
                 {
                     NameplateSizeMode.Smaller => 0.5f,
@@ -137,13 +159,22 @@ public sealed class NameplateView : IDisposable
                 break;
         }
 
-        npObject.SetIconPosition((short)iconOffset.X, (short)iconOffset.Y);
+        npObject.SetIconPosition((short) iconOffset.X, (short) iconOffset.Y);
         npObject.SetIconScale(iconScale);
         npObject.SetNameScale(nameScale);
     }
 
-    public void NameplateDataForPC(XivApi.SafeNamePlateObject npObject, ref bool isPrefixTitle, ref bool displayTitle, ref IntPtr title, ref IntPtr namePtr, ref IntPtr fcName, ref int iconID, Lumina.Text.SeString jobNameSeString)
+    public void NameplateDataForPC(
+        XivApi.SafeNamePlateObject npObject,
+        ref bool isPrefixTitle,
+        ref bool displayTitle,
+        ref IntPtr title,
+        ref IntPtr name,
+        ref IntPtr fcName,
+        ref int iconID
+    )
     {
+        //name = SeStringUtils.SeStringToPtr(SeStringUtils.Text("Plugin Enjoyer"));
         var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
         var mode = GetModeForNameplate(npObject);
 
@@ -154,10 +185,9 @@ public sealed class NameplateView : IDisposable
                 case NameplateMode.Default:
                 case NameplateMode.Hide:
                 case NameplateMode.SmallJobIcon:
-                case NameplateMode.SmallJobName:
                 case NameplateMode.BigJobIcon:
                 case NameplateMode.BigJobIconAndPartySlot:
-                    namePtr = SeStringUtils.emptyPtr;
+                    name = SeStringUtils.emptyPtr;
                     fcName = SeStringUtils.emptyPtr;
                     displayTitle = false;
                     iconID = 0;
@@ -167,7 +197,7 @@ public sealed class NameplateView : IDisposable
                 case NameplateMode.RoleLetters:
                     if (!_configuration.TestingMode && !npObject.NamePlateInfo.IsPartyMember())
                     {
-                        namePtr = SeStringUtils.emptyPtr;
+                        name = SeStringUtils.emptyPtr;
                         fcName = SeStringUtils.emptyPtr;
                         displayTitle = false;
                         iconID = 0;
@@ -186,7 +216,8 @@ public sealed class NameplateView : IDisposable
             return;
         }
 
-        var hasRole = _roleTracker.TryGetAssignedRole(playerCharacter.Name.TextValue, playerCharacter.HomeWorld.Id, out var roleId);
+        var hasRole = _roleTracker.TryGetAssignedRole(playerCharacter.Name.TextValue, playerCharacter.HomeWorld.Id,
+            out var roleId);
 
         switch (mode)
         {
@@ -196,27 +227,13 @@ public sealed class NameplateView : IDisposable
 
             case NameplateMode.SmallJobIcon:
                 var nameString = GetStateNametext(iconID, "");
-                var originalName = SeStringUtils.SeStringFromPtr(namePtr);
+                var originalName = SeStringUtils.SeStringFromPtr(name);
                 nameString.Append(originalName);
 
-                namePtr = SeStringUtils.SeStringToPtr(nameString);
+                name = SeStringUtils.SeStringToPtr(nameString);
                 iconID = GetClassIcon(npObject.NamePlateInfo);
 
                 break;
-
-            case NameplateMode.SmallJobName:
-            {
-                nameString = GetStateNametext(iconID, "");
-                originalName = SeStringUtils.SeStringFromPtr(namePtr);
-                nameString.Append(originalName);
-
-                var jobName = SeStringUtils.Text(jobNameSeString.ToString());
-
-                namePtr = SeStringUtils.SeStringToPtr(jobName);
-                iconID = GetClassIcon(npObject.NamePlateInfo);
-                break;
-            }
-
 
             case NameplateMode.SmallJobIconAndRole:
                 nameString = new SeString();
@@ -227,16 +244,16 @@ public sealed class NameplateView : IDisposable
                     nameString.Append(" ");
                 }
 
-                originalName = SeStringUtils.SeStringFromPtr(namePtr);
+                originalName = SeStringUtils.SeStringFromPtr(name);
                 nameString.Append(originalName);
 
-                namePtr = SeStringUtils.SeStringToPtr(nameString);
+                name = SeStringUtils.SeStringToPtr(nameString);
                 iconID = GetClassIcon(npObject.NamePlateInfo);
 
                 break;
 
             case NameplateMode.BigJobIcon:
-                namePtr = SeStringUtils.SeStringToPtr(GetStateNametext(iconID, "   "));
+                name = SeStringUtils.SeStringToPtr(GetStateNametext(iconID, "   "));
                 fcName = SeStringUtils.emptyPtr;
                 displayTitle = false;
                 iconID = GetClassIcon(npObject.NamePlateInfo);
@@ -246,19 +263,20 @@ public sealed class NameplateView : IDisposable
             case NameplateMode.BigJobIconAndPartySlot:
                 fcName = SeStringUtils.emptyPtr;
                 displayTitle = false;
-                var partySlot = _partyListHudView.GetPartySlotIndex(npObject.NamePlateInfo.Data.ObjectID.ObjectID) + 1;
+                var partySlot = _partyListHudView.GetPartySlotIndex(npObject.NamePlateInfo.Data.ObjectID.ObjectID) +
+                                1;
 
                 if (partySlot != null)
                 {
-                    var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
+                    var genericRole = JobExtensions.GetRole((Job) npObject.NamePlateInfo.GetJobID());
                     var str = _stylesheet.GetPartySlotNumber(partySlot.Value, genericRole);
                     str.Payloads.Insert(0, new TextPayload("   "));
-                    namePtr = SeStringUtils.SeStringToPtr(str);
+                    name = SeStringUtils.SeStringToPtr(str);
                     iconID = GetClassIcon(npObject.NamePlateInfo);
                 }
                 else
                 {
-                    namePtr = SeStringUtils.emptyPtr;
+                    name = SeStringUtils.emptyPtr;
                     iconID = GetClassIcon(npObject.NamePlateInfo);
                 }
 
@@ -267,12 +285,12 @@ public sealed class NameplateView : IDisposable
             case NameplateMode.RoleLetters:
                 if (hasRole)
                 {
-                    namePtr = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
+                    name = SeStringUtils.SeStringToPtr(_stylesheet.GetRolePlate(roleId));
                 }
                 else
                 {
-                    var genericRole = JobExtensions.GetRole((Job)npObject.NamePlateInfo.GetJobID());
-                    namePtr = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
+                    var genericRole = JobExtensions.GetRole((Job) npObject.NamePlateInfo.GetJobID());
+                    name = SeStringUtils.SeStringToPtr(_stylesheet.GetGenericRolePlate(genericRole));
                 }
 
                 fcName = SeStringUtils.emptyPtr;
@@ -284,7 +302,7 @@ public sealed class NameplateView : IDisposable
 
     private int GetClassIcon(XivApi.SafeNamePlateInfo info)
     {
-        var genericRole = JobExtensions.GetRole((Job)info.GetJobID());
+        var genericRole = JobExtensions.GetRole((Job) info.GetJobID());
         var iconSet = _stylesheet.GetGenericRoleIconset(genericRole);
 
         return _iconSet.GetJobIcon(iconSet, info.GetJobID());
@@ -292,19 +310,36 @@ public sealed class NameplateView : IDisposable
 
     private SeString GetStateNametext(int iconId, string prefix)
     {
-        return iconId switch
+        switch (iconId)
         {
-            //061521 - party leader
-            //061522 - party member
-
-            061523 => SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix),
-            061540 => SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix),
-            061542 => SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix),
-            061543 => SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix),
-            061544 => SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix),
-            061547 => SeStringUtils.Icon(BitmapFontIcon.Returner, prefix),
-            _ => SeStringUtils.Text(prefix + " ")
-        };
+            case 061523:
+                return SeStringUtils.Icon(BitmapFontIcon.NewAdventurer, prefix);
+            
+            case 061540:
+                return SeStringUtils.Icon(BitmapFontIcon.Mentor, prefix);
+            
+            case 061542:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorPvE, prefix);
+            
+            case 061543:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorCrafting, prefix);
+            
+            case 061544:
+                return SeStringUtils.Icon(BitmapFontIcon.MentorPvP, prefix);
+            
+            case 061547:
+                return SeStringUtils.Icon(BitmapFontIcon.Returner, prefix);
+            
+            default:
+            {
+                if (iconId > 0)
+                {
+                    PluginLog.Verbose($"Name text unavailable for icon: {iconId}");
+                }
+            
+                return SeStringUtils.Text(prefix + " ");
+            }
+        }
     }
 
     private NameplateMode GetModeForNameplate(XivApi.SafeNamePlateObject npObject)
@@ -312,7 +347,8 @@ public sealed class NameplateView : IDisposable
         var uid = npObject.NamePlateInfo.Data.ObjectID.ObjectID;
         var mode = OthersMode;
 
-        if (_configuration.TestingMode || npObject.NamePlateInfo.IsPartyMember() || uid == Service.ClientState.LocalPlayer?.ObjectId)
+        if (_configuration.TestingMode || npObject.NamePlateInfo.IsPartyMember() ||
+            uid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             return PartyMode;
         }
