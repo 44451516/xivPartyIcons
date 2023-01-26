@@ -25,6 +25,25 @@ public class Settings : IPluginConfiguration
     public bool AssignFromChat = true;
     public bool UsePriorityIcons = true;
 
+    
+    public bool 名字伪装开关 = false;
+    public bool 队友名字伪装开关_职业名称 = false;
+    
+    public bool 小队队伍开关 = false;
+    public bool DisplayJobNameInPartyList = false;
+    
+    public string 名字伪装me = "龙傲天";
+    
+    
+    public string PartyList0 = "龙傲天";
+    public string PartyList1 = "龙傲天";
+    public string PartyList2 = "龙傲天";
+    public string PartyList3 = "龙傲天";
+    public string PartyList4 = "龙傲天";
+    public string PartyList5 = "龙傲天";
+    public string PartyList6 = "龙傲天";
+    public string PartyList7 = "龙傲天";
+    
     public IconSetId IconSetId { get; set; } = IconSetId.GlowingColored;
     public NameplateSizeMode SizeMode { get; set; } = NameplateSizeMode.Medium;
 

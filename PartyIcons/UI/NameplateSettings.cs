@@ -57,7 +57,7 @@ public sealed class NameplateSettings
         ImGui.Dummy(new Vector2(0, 10f));
         
         var iconSetId = Plugin.Settings.IconSetId;
-        ImGui.Text("Icon set:");
+        ImGui.Text("图片规则:");
         ImGui.SameLine();
         SettingsWindow.SetComboWidth(Enum.GetValues<IconSetId>().Select(IconSetIdToString));
 
@@ -76,7 +76,7 @@ public sealed class NameplateSettings
         }
 
         var iconSizeMode = Plugin.Settings.SizeMode;
-        ImGui.Text("Nameplate size:");
+        ImGui.Text("名牌大小:");
         ImGui.SameLine();
         SettingsWindow.SetComboWidth(Enum.GetValues<NameplateSizeMode>().Select(x => x.ToString()));
 
@@ -105,14 +105,14 @@ public sealed class NameplateSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Hide own nameplate");
+        ImGui.Text("隐藏自己的铭牌");
         SettingsWindow.ImGuiHelpTooltip(
             "You can turn your own nameplate on and also turn this\nsetting own to only use nameplate to display own raid position.\nIf you don't want your position displayed with this setting you can simply disable\nyour nameplates in the Character settings.");
 
         ImGui.Dummy(new Vector2(0f, 10f));
         
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Overworld");
+        ImGui.Text("在外面");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
@@ -130,7 +130,7 @@ public sealed class NameplateSettings
         ImGui.Dummy(new Vector2(0, 2f));
         
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Instances");
+        ImGui.Text("副本里面");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, separatorPadding));
@@ -142,11 +142,11 @@ public sealed class NameplateSettings
 
             NameplateModeSection("##np_raid", () => Plugin.Settings.NameplateRaid,
                 (mode) => Plugin.Settings.NameplateRaid = mode,
-                "Raid:");
+                "高难:");
 
             NameplateModeSection("##np_alliance", () => Plugin.Settings.NameplateAllianceRaid,
                 (mode) => Plugin.Settings.NameplateAllianceRaid = mode,
-                "Alliance:");
+                "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -158,7 +158,7 @@ public sealed class NameplateSettings
         ImGui.Dummy(new Vector2(0, separatorPadding));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ImGui.TextDisabled("e.g. Eureka, Bozja");
+            ImGui.TextDisabled("优雷卡、博兹雅");
 
             NameplateModeSection("##np_bozja_party", () => Plugin.Settings.NameplateBozjaParty,
                 mode => Plugin.Settings.NameplateBozjaParty = mode, "Party:");
@@ -176,7 +176,7 @@ public sealed class NameplateSettings
         ImGui.Dummy(new Vector2(0, 2f));
         ImGui.Indent(15 * ImGuiHelpers.GlobalScale);
         {
-            ImGui.TextDisabled("This plugin is intentionally disabled during PvP matches.");
+            ImGui.TextDisabled("PVP别想了，不能用.");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 10f));

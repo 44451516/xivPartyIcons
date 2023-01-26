@@ -71,7 +71,7 @@ public sealed class SettingsWindow : IDisposable
             {
                 _generalTabText.IsFlashing = Plugin.Settings.TestingMode;
                 
-                if (_generalTabText.Draw(() => ImGui.BeginTabItem("General##general")))
+                if (_generalTabText.Draw(() => ImGui.BeginTabItem("常规##general")))
                 {
                     if (ImGui.BeginChild("##general_content"))
                     {
@@ -83,7 +83,7 @@ public sealed class SettingsWindow : IDisposable
                     ImGui.EndTabItem();
                 }
                 
-                if (ImGui.BeginTabItem("Nameplates"))
+                if (ImGui.BeginTabItem("铭牌"))
                 {
                     if (ImGui.BeginChild("##nameplates_content"))
                     {
@@ -95,7 +95,7 @@ public sealed class SettingsWindow : IDisposable
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Chat Names"))
+                if (ImGui.BeginTabItem("聊天框"))
                 {
                     if (ImGui.BeginChild("##chat_names_content"))
                     {
@@ -107,7 +107,7 @@ public sealed class SettingsWindow : IDisposable
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Roles##static_assignments"))
+                if (ImGui.BeginTabItem("规则##static_assignments"))
                 {
                     if (ImGui.BeginChild("##static_assignments_content"))
                     {
@@ -116,6 +116,32 @@ public sealed class SettingsWindow : IDisposable
                         ImGui.EndChild();
                     }
                     
+                    ImGui.EndTabItem();
+                }
+                
+                
+                if (ImGui.BeginTabItem("小队队伍"))
+                {
+                    if (ImGui.BeginChild("##小队队伍_content"))
+                    {
+                        _小队队伍Settings.Draw小队队伍Settings();
+
+                        ImGui.EndChild();
+                    }
+
+                    ImGui.EndTabItem();
+                }
+                
+                
+                if (ImGui.BeginTabItem("名字伪装"))
+                {
+                    if (ImGui.BeginChild("##名字伪装_content"))
+                    {
+                        _名字伪装Settings.Draw名字伪装Settings();
+
+                        ImGui.EndChild();
+                    }
+
                     ImGui.EndTabItem();
                 }
                 
@@ -164,6 +190,8 @@ public sealed class SettingsWindow : IDisposable
     private readonly GeneralSettings _generalSettings = new();
     private readonly NameplateSettings _nameplateSettings = new();
     private readonly ChatNameSettings _chatNameSettings = new();
+    private readonly 小队队伍Settings _小队队伍Settings = new();
+    private readonly 名字伪装Settings _名字伪装Settings = new();
     private readonly StaticAssignmentsSettings _staticAssignmentsSettings = new StaticAssignmentsSettings();
     
     private FlashingText _generalTabText = new();

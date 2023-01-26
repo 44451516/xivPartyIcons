@@ -36,7 +36,7 @@ public sealed class GeneralSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Prioritize status icons");
+        ImGui.Text("图标优先级");
         ImGuiComponents.HelpMarker("Prioritizes certain status icons over job icons.\n\nInside of a duty, the only status icons that take priority are Disconnecting, Viewing Cutscene, Idle, and Group Pose.\n\nEven if this is unchecked, the Disconnecting icon will always take priority.");
 
         /*
@@ -64,7 +64,7 @@ public sealed class GeneralSettings
 
         ImGui.SameLine();
         _testingModeText.IsFlashing = Plugin.Settings.TestingMode;
-        _testingModeText.Draw(() => ImGui.Text("Enable testing mode"));
+        _testingModeText.Draw(() => ImGui.Text("启用测试模式"));
         // ImGui.Text("Enable testing mode");
         ImGuiComponents.HelpMarker("Applies settings to any player, contrary to only the ones that are in the party.");
 
@@ -77,8 +77,8 @@ public sealed class GeneralSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Display chat message when entering duty");
-        ImGuiComponents.HelpMarker("Can be used to determine the duty type before fully loading in.");
+        ImGui.Text("在聊天窗口显示副本名称");
+        ImGuiComponents.HelpMarker("可以进入副本之前知道副本内容.");
 
         _notice.DisplayNotice();
     }
@@ -95,7 +95,7 @@ public sealed class Notice
     
     public void Initialize()
     {
-        DownloadAndParseNotice();
+        // DownloadAndParseNotice();
     }
         
     private string? _noticeString;

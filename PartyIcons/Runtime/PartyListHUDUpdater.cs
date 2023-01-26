@@ -4,8 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Network;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Newtonsoft.Json;
 using PartyIcons.Configuration;
 using PartyIcons.Entities;
@@ -27,7 +29,7 @@ public sealed class PartyListHUDUpdater : IDisposable
     private bool _previousTesting;
     private DateTime _lastUpdate = DateTime.Today;
 
-    private const string OpcodesUrl = "https://raw.githubusercontent.com/karashiiro/FFXIVOpcodes/master/opcodes.min.json";
+    private const string OpcodesUrl = "https://opcodes.xivcdn.com/opcodes.min.json";
     private List<int> _prepareZoningOpcodes = new();
 
     public PartyListHUDUpdater(PartyListHUDView view, RoleTracker roleTracker, Settings configuration)
@@ -144,28 +146,97 @@ public sealed class PartyListHUDUpdater : IDisposable
         }
     }
 
-    private void UpdatePartyListHUD()
+    private unsafe void UpdatePartyListHUD()
     {
+        if (!Service.ClientState.IsLoggedIn)
+        {
+            return;
+        }
+
+    
         if (!_configuration.DisplayRoleInPartyList)
         {
             return;
         }
 
-        if (_configuration.TestingMode &&
-            Service.ClientState.LocalPlayer is { } localPlayer)
-        {
-            _view.SetPartyMemberRole(localPlayer.Name.ToString(), localPlayer.ObjectId, RoleId.M1);
-        }
-
+        
         if (!UpdateHUD)
         {
             return;
         }
 
+        GameObject? localPlayer = Service.ClientState.LocalPlayer;
+
+        if (localPlayer == null)
+        {
+            return;
+        }
+
+        
         if (Service.ClientState.IsPvP)
         {
             return;
         }
+
+        
+        if (_configuration.TestingMode &&
+            localPlayer is { } gameObject)
+        {
+            _view.SetPartyMemberRole(gameObject.Name.ToString(), gameObject.ObjectId, RoleId.M1);
+        }
+
+        
+        if (_configuration.名字伪装开关)
+        {
+            {
+                string newName = _configuration.名字伪装me.Trim();
+
+                if (localPlayer.Name.ToString() != newName)
+                {
+                    FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* localPlayerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)localPlayer.Address;
+                    MemoryHelper.WriteString((IntPtr)localPlayerAddress->Name, newName);
+
+                }
+            }
+        }
+        
+        if (_configuration.队友名字伪装开关_职业名称)
+        {
+            foreach (var member in Service.PartyList)
+            {
+                if (member.ObjectId == localPlayer.ObjectId)
+                {
+                    continue;
+                }
+
+                if (member.ObjectId > 0)
+                {
+                    var jobName = member.ClassJob.GameData.Name;
+                    if (jobName.ToString() != member.Name.ToString())
+                    {
+                        FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* playerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)member.GameObject.Address;
+                        MemoryHelper.WriteString((IntPtr)playerAddress->Name, jobName);
+                    }
+                }
+            }
+        }
+        
+        if (_configuration.小队队伍开关)
+        {
+            // foreach (var member in PartyList)
+            {
+                // if (member.ObjectId > 0)
+                {
+                    _view.SetPartyMemberName冒险者();
+
+                    // _view.SetPartyMemberJobName(member.GameObject,_configuration.DisplayJobNameInPartyList);
+                }
+            }
+        }
+        
+        
+      
+        
 
         PluginLog.Verbose("Updating party list HUD");
         _displayingRoles = true;

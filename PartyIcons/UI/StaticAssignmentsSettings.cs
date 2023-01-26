@@ -25,8 +25,8 @@ public sealed class StaticAssignmentsSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Eastern role naming convention");
-        ImGuiComponents.HelpMarker("Use Japanese data center role naming convention (MT ST D1-D4 H1-2).");
+        ImGui.Text("日式方式规则");
+        ImGuiComponents.HelpMarker("日式方式规则 (MT ST D1-D4 H1-2).");
 
         var displayRoleInPartyList = Plugin.Settings.DisplayRoleInPartyList;
 
@@ -51,8 +51,8 @@ public sealed class StaticAssignmentsSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Add context menu commands to assign roles");
-        ImGuiComponents.HelpMarker("Adds context menu commands to assign roles to players. When applicable, commands to swap role and use a suggested role are also added.");
+        ImGui.Text("添加菜单");
+        ImGuiComponents.HelpMarker("右键设置规则.");
 
         var assignFromChat = Plugin.Settings.AssignFromChat;
 
@@ -63,12 +63,12 @@ public sealed class StaticAssignmentsSettings
         }
 
         ImGui.SameLine();
-        ImGui.Text("Allow party members to self-assign roles via party chat");
+        ImGui.Text("监听聊天");
         ImGuiComponents.HelpMarker("Allows party members to assign themselves a role, e.g. saying 'h1' in party chat will give that player the healer 1 role.");
         
         ImGui.Dummy(new Vector2(0, 2f));
         ImGui.PushStyleColor(0, ImGuiHelpers.DefaultColorPalette()[0]);
-        ImGui.Text("Static Roles");
+        ImGui.Text("静态规则");
         ImGui.PopStyleColor();
         ImGui.Separator();
         ImGui.Dummy(new Vector2(0, 2f));

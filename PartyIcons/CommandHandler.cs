@@ -1,6 +1,9 @@
 using System;
 using Dalamud.Game.Command;
 using Dalamud.Logging;
+using Dalamud.Memory;
+using PartyIcons.Configuration;
+using PartyIcons.Utils;
 
 namespace PartyIcons;
 
@@ -22,10 +25,11 @@ public class CommandHandler : IDisposable
         Service.CommandManager.RemoveHandler(commandName);
     }
 
-    private void OnCommand(string command, string arguments)
+    private unsafe void OnCommand(string command, string arguments)
     {
         arguments = arguments.Trim().ToLower();
-
+        string[] strings = arguments.Split(" ");
+        
         if (arguments == "" || arguments == "config")
         {
             Plugin.SettingsWindow.ToggleSettingsWindow();
@@ -66,6 +70,48 @@ public class CommandHandler : IDisposable
             else
             {
                 Plugin.NameplateUpdater.DebugIcon = -1;
+            }
+        }
+        else if (strings[0] == "name")
+        {
+            if (strings.Length > 1)
+            {
+                var localPlayer = Service.ClientState.LocalPlayer;
+                if (localPlayer != null)
+                {
+                    Plugin.Settings.名字伪装me = strings[1].Trim();
+                    Plugin.Settings.Save();
+                    FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* Struct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*) localPlayer.Address;
+                    MemoryHelper.WriteSeString((IntPtr)Struct->Name, SeStringUtils.Text(Plugin.Settings.名字伪装me));
+                }
+
+            }
+
+        }else if (arguments == "xiaoduiname")
+        {
+            
+            var localPlayer = Service.ClientState.LocalPlayer;
+            if (localPlayer == null)
+            {
+                return;
+            }
+            
+            foreach (var member in Service.PartyList)
+            {
+                if (member.ObjectId == localPlayer.ObjectId)
+                {
+                    continue;
+                }
+
+                if (member.ObjectId > 0)
+                {
+                    var jobName = member.ClassJob.GameData.Name;
+                    if (jobName.ToString() != member.Name.ToString())
+                    {
+                        FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* playerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)member.GameObject.Address;
+                        MemoryHelper.WriteString((IntPtr)playerAddress->Name, jobName);
+                    }
+                }
             }
         }
     }

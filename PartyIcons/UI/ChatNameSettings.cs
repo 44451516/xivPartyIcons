@@ -24,12 +24,12 @@ public sealed class ChatNameSettings
             ChatModeSection("##chat_overworld",
                 () => Plugin.Settings.ChatOverworld,
                 (config) => Plugin.Settings.ChatOverworld = config,
-                "Party:");
+                "小队:");
 
             ChatModeSection("##chat_others",
                 () => Plugin.Settings.ChatOthers,
                 (config) => Plugin.Settings.ChatOthers = config,
-                "Others:");
+                "其他:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
@@ -49,12 +49,12 @@ public sealed class ChatNameSettings
             ChatModeSection("##chat_raid",
                 () => Plugin.Settings.ChatRaid,
                 (config) => Plugin.Settings.ChatRaid = config,
-                "Raid:");
+                "高难:");
 
             ChatModeSection("##chat_alliance",
                 () => Plugin.Settings.ChatAllianceRaid,
                 (config) => Plugin.Settings.ChatAllianceRaid = config,
-                "Alliance:");
+                "团队:");
         }
         ImGui.Indent(-15 * ImGuiHelpers.GlobalScale);
         ImGui.Dummy(new Vector2(0, 2f));
