@@ -24,13 +24,16 @@ public class Settings : IPluginConfiguration
     public bool UseContextMenu = false;
     public bool AssignFromChat = true;
     public bool UsePriorityIcons = true;
+    
+    public bool UpdateHUD = false;
+
 
     
     public bool 名字伪装开关 = false;
     public bool 队友名字伪装开关_职业名称 = false;
     
     public bool 小队队伍开关 = false;
-    public bool DisplayJobNameInPartyList = false;
+    // public bool DisplayJobNameInPartyList = false;
     
     public string 名字伪装me = "龙傲天";
     

@@ -129,16 +129,58 @@ public unsafe class PartyListHUDView : IDisposable
             {
                 
                 var nameString = memberStruct.Value.Name->NodeText.ToString();
-                var strippedName = StripSpecialCharactersFromName(nameString);
-                var jobName = "机智的冒险者";
+                string fromName = StripSpecialCharactersFromName(nameString);
+                // var jobName = "机智的冒险者";
                 {
-                    // if (nameString.Contains(strippedName))
+                    // if (nameString.Contains(fromName))
                     {
                         {
-                            // string replaceName = nameString.Replace(strippedName, jobName);
-                            // string replaceName = nameString.Replace(strippedName, jobName);
+                            switch (i)
+                            {
+                                case 0:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList0);
+                                    break;
+                                }
+                                case 1:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList1);
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList2);
+                                    break;
+                                }
+                                case 3:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList3);
+                                    break;
+                                }
+                                case 4:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList4);
+                                    break;
+                                }
+                                case 5:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList5);
+                                    break;
+                                }
+                                case 6:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList6);
+                                    break;
+                                }
+                                case 7:
+                                {
+                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList7);
+                                    break;
+                                }
+      
+                            }
 
-                            var buf = SeStringUtils.Text(jobName).Encode();
+                            var buf = SeStringUtils.Text(nameString).Encode();
 
                             fixed (byte* ptr = buf)
                             {

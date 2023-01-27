@@ -17,7 +17,7 @@ namespace PartyIcons.Runtime;
 
 public sealed class PartyListHUDUpdater : IDisposable
 {
-    public bool UpdateHUD = false;
+    // public bool UpdateHUD = false;
 
     private readonly Settings _configuration;
     private readonly PartyListHUDView _view;
@@ -113,11 +113,9 @@ public sealed class PartyListHUDUpdater : IDisposable
         UpdatePartyListHUD();
     }
 
-    private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid,
-        NetworkMessageDirection direction)
+    private void OnNetworkMessage(IntPtr dataptr, ushort opcode, uint sourceactorid, uint targetactorid, NetworkMessageDirection direction)
     {
-        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) &&
-            targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
+        if (direction == NetworkMessageDirection.ZoneDown && _prepareZoningOpcodes.Contains(opcode) && targetactorid == Service.ClientState.LocalPlayer?.ObjectId)
         {
             PluginLog.Verbose("PartyListHUDUpdater Forcing update due to zoning");
             // PluginLog.Verbose(_view.GetDebugInfo());
@@ -153,17 +151,12 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-    
-        if (!_configuration.DisplayRoleInPartyList)
-        {
-            return;
-        }
 
-        
-        if (!UpdateHUD)
-        {
-            return;
-        }
+        // if (!_configuration.DisplayRoleInPartyList)
+        // {
+        //     return;
+        // }
+
 
         GameObject? localPlayer = Service.ClientState.LocalPlayer;
 
@@ -172,20 +165,6 @@ public sealed class PartyListHUDUpdater : IDisposable
             return;
         }
 
-        
-        if (Service.ClientState.IsPvP)
-        {
-            return;
-        }
-
-        
-        if (_configuration.TestingMode &&
-            localPlayer is { } gameObject)
-        {
-            _view.SetPartyMemberRole(gameObject.Name.ToString(), gameObject.ObjectId, RoleId.M1);
-        }
-
-        
         if (_configuration.名字伪装开关)
         {
             {
@@ -195,11 +174,10 @@ public sealed class PartyListHUDUpdater : IDisposable
                 {
                     FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* localPlayerAddress = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)localPlayer.Address;
                     MemoryHelper.WriteString((IntPtr)localPlayerAddress->Name, newName);
-
                 }
             }
         }
-        
+
         if (_configuration.队友名字伪装开关_职业名称)
         {
             foreach (var member in Service.PartyList)
@@ -220,7 +198,25 @@ public sealed class PartyListHUDUpdater : IDisposable
                 }
             }
         }
-        
+
+        if (Service.ClientState.IsPvP)
+        {
+            return;
+        }
+
+
+        if (_configuration.TestingMode && localPlayer is { } gameObject)
+        {
+            _view.SetPartyMemberRole(gameObject.Name.ToString(), gameObject.ObjectId, RoleId.M1);
+        }
+
+
+        if (!Plugin.Settings.UpdateHUD)
+        {
+            return;
+        }
+
+
         if (_configuration.小队队伍开关)
         {
             // foreach (var member in PartyList)
@@ -233,21 +229,18 @@ public sealed class PartyListHUDUpdater : IDisposable
                 }
             }
         }
-        
-        
-      
-        
+
 
         PluginLog.Verbose("Updating party list HUD");
         _displayingRoles = true;
 
-        foreach (var member in Service.PartyList)
-        {
-            if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
-            {
-                PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
-                _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
-            }
-        }
+        // foreach (var member in Service.PartyList)
+        // {
+        //     if (_roleTracker.TryGetAssignedRole(member.Name.ToString(), member.World.Id, out var roleId))
+        //     {
+        //         PluginLog.Verbose($"Updating party list hud: member {member.Name} to {roleId}");
+        //         _view.SetPartyMemberRole(member.Name.ToString(), member.ObjectId, roleId);
+        //     }
+        // }
     }
 }

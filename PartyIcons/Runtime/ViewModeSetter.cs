@@ -160,10 +160,10 @@ public sealed class ViewModeSetter
             }
         }
 
-        _partyListHudUpdater.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
-                                         _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
+        Plugin.Settings.UpdateHUD = _nameplateView.PartyMode == NameplateMode.RoleLetters ||
+                                    _nameplateView.PartyMode == NameplateMode.SmallJobIconAndRole;
 
-        PluginLog.Verbose($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {_partyListHudUpdater.UpdateHUD}");
+        PluginLog.Verbose($"Setting modes: nameplates party {_nameplateView.PartyMode} others {_nameplateView.OthersMode}, chat {_chatNameUpdater.PartyMode}, update HUD {Plugin.Settings.UpdateHUD}");
         PluginLog.Debug($"Entered ZoneType {ZoneType.ToString()}");
     }
 }

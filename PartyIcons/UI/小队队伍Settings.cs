@@ -28,18 +28,24 @@ public sealed class 小队队伍Settings
 
         ImGui.SameLine();
         ImGui.Text("启用");
-        
-        var displayJobNameInPartyList = Plugin.Settings.DisplayJobNameInPartyList;
-
-        if (ImGui.Checkbox("##DisplayJobNameInPartyList", ref displayJobNameInPartyList))
+        ImGui.SameLine();
+        if (ImGui.Button("确定"))
         {
-            Plugin.Settings.DisplayJobNameInPartyList = displayJobNameInPartyList;
-            Plugin.Settings.Save();
+            Plugin.Settings.UpdateHUD = true;
         }
 
-        ImGui.SameLine();
-        ImGui.Text("用职业名称替换小队队伍");
-        SettingsWindow.ImGuiHelpTooltip("用职业名称填充小队队伍", true);
+        
+        // var displayJobNameInPartyList = Plugin.Settings.DisplayJobNameInPartyList;
+        //
+        // if (ImGui.Checkbox("##DisplayJobNameInPartyList", ref displayJobNameInPartyList))
+        // {
+        //     Plugin.Settings.DisplayJobNameInPartyList = displayJobNameInPartyList;
+        //     Plugin.Settings.Save();
+        // }
+
+        // ImGui.SameLine();
+        // ImGui.Text("用职业名称替换小队队伍");
+        // SettingsWindow.ImGuiHelpTooltip("用职业名称填充小队队伍", true);
 
         
         for (uint i = 0; i < 8; i++)
@@ -105,25 +111,25 @@ public sealed class 小队队伍Settings
         }
 
 
-        /*
+        
         {
-            var partyMemberStruct = GetPartyMemberStruct(2);
+            var partyMemberStruct = GetPartyMemberStruct(1);
             if (partyMemberStruct.HasValue)
             {
                 
                 var nameString = partyMemberStruct.Value.Name->NodeText.ToString();
                 
-                // for (var i = 0; i < nameString.Length; i++)
-                // {
-                //     ImGui.Text($"{i} -> {nameString[i]} -> {Convert.ToInt32(nameString[i])}");   
-                // }
+                for (var i = 0; i < nameString.Length; i++)
+                {
+                    ImGui.Text($"{i} -> {nameString[i]} -> {Convert.ToInt32(nameString[i])}");   
+                }
                 
                 // string fromName = StripSpecialCharactersFromName(nameString);
               
     
             }
         }
-        */
+        
     
     }
     private unsafe AddonPartyList.PartyListMemberStruct? GetPartyMemberStruct(uint idx)
@@ -187,7 +193,7 @@ public sealed class 小队队伍Settings
             // result.Append($"{i} -> {ch}");
             if (isAppend)
             {
-                if (ch != 2 && ch != 3 && ch != 18)
+                if (ch != 1 && ch != 2 && ch != 3 && ch != 18 && ch != 26  )
                 {
                     result.Append(name[i]);
                 }
