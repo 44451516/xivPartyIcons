@@ -159,7 +159,7 @@ public sealed class NameplateUpdater : IDisposable
     /// <returns>Whether a priority icon was found.</returns>
     private bool IsPriorityIcon(int iconId, out int priorityIconId)
     {
-        //PluginLog.Verbose($"Icon ID: {iconId}");
+        PluginLog.Verbose($"Icon ID: {iconId}, Debug Icon ID: {DebugIcon}");
         priorityIconId = iconId;
 
         if (_configuration.UsePriorityIcons == false &&
@@ -184,8 +184,9 @@ public sealed class NameplateUpdater : IDisposable
         {
             isPriorityIcon = true;
             priorityIconId = DebugIcon;
+            PluginLog.Verbose($"Setting debug icon. Id: {DebugIcon}");
             
-            //DebugIcon++;
+            DebugIcon++;
         }
 
         return isPriorityIcon;
@@ -211,6 +212,7 @@ public sealed class NameplateUpdater : IDisposable
         Disconnecting = 061503,
     }
 
+    // This could be done as a range but
     private static readonly int[] priorityIconsOverworld =
     {
         061503, // Disconnecting
@@ -218,9 +220,14 @@ public sealed class NameplateUpdater : IDisposable
         061508, // Viewing Cutscene
         061509, // Busy
         061511, // Idle
+        061514, // Looking for meld
+        061515, // Looking for party
         061517, // Duty Finder
         061521, // Party Leader
         061522, // Party Member
+        061524, // Game Master
+        061532, // Game Master
+        061533, // Event Participant
         061545, // Role Playing
         061546, // Group Pose
     };
