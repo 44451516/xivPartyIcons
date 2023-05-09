@@ -152,6 +152,7 @@ public sealed class PartyListHUDUpdater : IDisposable
         }
 
 
+
         // if (!_configuration.DisplayRoleInPartyList)
         // {
         //     return;
