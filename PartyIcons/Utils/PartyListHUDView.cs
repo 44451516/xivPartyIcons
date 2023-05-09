@@ -55,9 +55,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     public uint? GetPartySlotIndex(uint objectId)
     {
-        var hud =
-            FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->
-                GetAgentHUD();
+        var hud = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHUD();
 
         if (hud == null)
         {
@@ -75,13 +73,13 @@ public unsafe class PartyListHUDView : IDisposable
             return null;
         }
 
-        var list = (HudPartyMember*) hud->PartyMemberList;
+        var list = (HudPartyMember*)hud->PartyMemberList;
 
         for (var i = 0; i < hud->PartyMemberCount; i++)
         {
             if (list[i].ObjectId == objectId)
             {
-                return (uint) i;
+                return (uint)i;
             }
         }
 
@@ -118,7 +116,7 @@ public unsafe class PartyListHUDView : IDisposable
 
         PluginLog.Verbose($"Member struct by the name {name} not found.");
     }
-    
+
     public void SetPartyMemberName冒险者()
     {
         for (uint i = 0; i < 8; i++)
@@ -127,70 +125,69 @@ public unsafe class PartyListHUDView : IDisposable
 
             if (memberStruct.HasValue)
             {
-                
                 var nameString = memberStruct.Value.Name->NodeText.ToString();
-                string fromName = StripSpecialCharactersFromName(nameString);
-                // var jobName = "机智的冒险者";
+                if (nameString != null && nameString.Length > 0)
                 {
-                    // if (nameString.Contains(fromName))
+                    string fromName = StripSpecialCharactersFromName(nameString);
+                    // var jobName = "机智的冒险者";
                     {
+                        // if (nameString.Contains(fromName))
                         {
-                            switch (i)
                             {
-                                case 0:
+                                switch (i)
                                 {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList0);
-                                    break;
+                                    case 0:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList0);
+                                        break;
+                                    }
+                                    case 1:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList1);
+                                        break;
+                                    }
+                                    case 2:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList2);
+                                        break;
+                                    }
+                                    case 3:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList3);
+                                        break;
+                                    }
+                                    case 4:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList4);
+                                        break;
+                                    }
+                                    case 5:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList5);
+                                        break;
+                                    }
+                                    case 6:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList6);
+                                        break;
+                                    }
+                                    case 7:
+                                    {
+                                        nameString = nameString.Replace(fromName, Plugin.Settings.PartyList7);
+                                        break;
+                                    }
                                 }
-                                case 1:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList1);
-                                    break;
-                                }
-                                case 2:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList2);
-                                    break;
-                                }
-                                case 3:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList3);
-                                    break;
-                                }
-                                case 4:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList4);
-                                    break;
-                                }
-                                case 5:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList5);
-                                    break;
-                                }
-                                case 6:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList6);
-                                    break;
-                                }
-                                case 7:
-                                {
-                                    nameString = nameString.Replace(fromName, Plugin.Settings.PartyList7);
-                                    break;
-                                }
-      
-                            }
 
-                            var buf = SeStringUtils.Text(nameString).Encode();
+                                var buf = SeStringUtils.Text(nameString).Encode();
 
-                            fixed (byte* ptr = buf)
-                            {
-                                memberStruct.Value.Name->SetText(ptr);
+                                fixed (byte* ptr = buf)
+                                {
+                                    memberStruct.Value.Name->SetText(ptr);
+                                }
                             }
                         }
                     }
-
                 }
-    
             }
         }
     }
@@ -225,9 +222,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     public string GetDebugInfo()
     {
-        var hud =
-            FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->
-                GetAgentHUD();
+        var hud = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetAgentModule()->GetAgentHUD();
 
         if (hud == null)
         {
@@ -250,16 +245,15 @@ public unsafe class PartyListHUDView : IDisposable
         foreach (var member in Service.PartyList)
         {
             var index = GetPartySlotIndex(member.ObjectId);
-            result.AppendLine(
-                $"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");
+            result.AppendLine($"PartyList name {member.Name} oid {member.ObjectId} worldid {member.World.Id} slot index {index}");
         }
 
         result.AppendLine("STRUCTS:");
-        var memberList = (HudPartyMember*) hud->PartyMemberList;
+        var memberList = (HudPartyMember*)hud->PartyMemberList;
 
         for (var i = 0; i < Math.Min(hud->PartyMemberCount, 8u); i++)
         {
-            var memberStruct = GetPartyMemberStruct((uint) i);
+            var memberStruct = GetPartyMemberStruct((uint)i);
 
             if (memberStruct.HasValue)
             {
@@ -272,12 +266,13 @@ public unsafe class PartyListHUDView : IDisposable
                 */
 
                 var strippedName = StripSpecialCharactersFromName(memberStruct.Value.Name->NodeText.ToString());
-                result.AppendLine(
-                    $"PartyMemberStruct index {i} name '{strippedName}', id matched {memberList[i].ObjectId}");
+                result.AppendLine($"PartyMemberStruct index {i} name '{strippedName}', id matched {memberList[i].ObjectId}");
 
                 var byteCount = 0;
 
-                while (byteCount < 16 && memberList[i].Name[byteCount++] != 0) { }
+                while (byteCount < 16 && memberList[i].Name[byteCount++] != 0)
+                {
+                }
 
                 var memberListName = Encoding.UTF8.GetString(memberList[i].Name, byteCount - 1);
                 result.AppendLine($"HudPartyMember index {i} name {memberListName} {memberList[i].ObjectId}");
@@ -293,7 +288,7 @@ public unsafe class PartyListHUDView : IDisposable
 
     private AddonPartyList.PartyListMemberStruct? GetPartyMemberStruct(uint idx)
     {
-        var partyListAddon = (AddonPartyList*) _gameGui.GetAddonByName("_PartyList", 1);
+        var partyListAddon = (AddonPartyList*)_gameGui.GetAddonByName("_PartyList", 1);
 
         if (partyListAddon == null)
         {
@@ -332,7 +327,7 @@ public unsafe class PartyListHUDView : IDisposable
     //
     //     return result.ToString().Trim();
     // }
-    
+
     private string StripSpecialCharactersFromName(string name)
     {
         var result = new StringBuilder();
